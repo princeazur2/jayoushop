@@ -47,8 +47,8 @@ export default function AdminDashboard() {
 
     return (
         <div className="relative min-h-screen overflow-x-hidden bg-muted/20">
-            <div className="blob -right-40 -top-40 h-96 w-96 bg-primary/30" />
-            <div className="blob -left-40 top-96 h-80 w-80 bg-secondary/25" style={{ animationDelay: "4s" }} />
+            <div className="blob -right-40 -top-40 hidden h-96 w-96 bg-primary/30 md:block" />
+            <div className="blob -left-40 top-96 hidden h-80 w-80 bg-secondary/25 md:block" style={{ animationDelay: "4s" }} />
 
             <header className="sticky top-0 z-50 glass px-4 py-4 shadow-sm md:px-6">
                 <div className="relative z-10 mx-auto flex max-w-7xl items-center justify-between">
@@ -188,80 +188,6 @@ function SectionCard({
     );
 }
 
-function FeaturedTab() {
-    const { products, loading, refetch } = useAdminProducts();
-    const { showToast } = useToast();
-    const [savingId, setSavingId] = useState<number | null>(null);
-
-    const featuredCount = products.filter((p) => p.featured).length;
-
-    async function handleToggle(product: ProductDB) {
-        setSavingId(product.id);
-        try {
-            await toggleFeatured(product);
-            refetch();
-        } catch {
-            showToast("error", "Impossible de mettre a jour la selection.");
-        } finally {
-            setSavingId(null);
-        }
-    }
-
-    return (
-        <SectionCard title="La Selection (page d'accueil)">
-            <div className="border-b border-white/30 px-6 py-4 text-sm text-muted-foreground md:px-8">
-                {featuredCount} produit{featuredCount > 1 ? "s" : ""} actuellement mis en avant sur la page d'accueil.
-                Idealement entre 4 et 8 pieces pour un rendu equilibre. Tant qu'aucun produit n'est selectionne, les plus recents s'affichent par defaut.
-            </div>
-
-            {loading ? (
-                <div className="p-10 text-center text-sm text-muted-foreground">
-                    Chargement des produits...
-                </div>
-            ) : products.length === 0 ? (
-                <div className="p-10 text-center text-sm text-muted-foreground">
-                    Aucun produit pour le moment. Ajoute d'abord des produits dans l'onglet "Produits".
-                </div>
-            ) : (
-                <ul className="divide-y divide-white/20">
-                    {products.map((product) => (
-                        <li key={product.id} className="flex items-center gap-4 px-6 py-4 md:px-8">
-                            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-muted border border-white/30 shadow-sm">
-                                <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                                <p className="truncate font-bold text-foreground">{product.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {product.categories?.name || "-"} · {product.price.toLocaleString()} FCFA
-                                </p>
-                            </div>
-
-                            <button
-                                onClick={() => handleToggle(product)}
-                                disabled={savingId === product.id}
-                                className={
-                                    "flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all disabled:opacity-50 " +
-                                    (product.featured
-                                        ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
-                                        : "border border-border/50 text-muted-foreground hover:border-primary/40 hover:text-primary")
-                                }
-                            >
-                                {savingId === product.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                    <Star className={"h-4 w-4 " + (product.featured ? "fill-current" : "")} />
-                                )}
-                                {product.featured ? "En vedette" : "Mettre en avant"}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </SectionCard>
-    );
-}
-
 function ProductsTab() {
     const { products, loading, refetch } = useAdminProducts();
     const { categories } = useAdminCategories();
@@ -327,53 +253,91 @@ function ProductsTab() {
                     Aucun produit pour le moment.
                 </div>
             ) : (
-                <Table>
-                    <TableHeader>
-                        <TableRow className="hover:bg-transparent border-white/30">
-                            <TableHead className="px-6 py-4 font-semibold text-foreground md:px-8">Produit</TableHead>
-                            <TableHead className="font-semibold text-foreground">Categorie</TableHead>
-                            <TableHead className="font-semibold text-foreground">Prix</TableHead>
-                            <TableHead className="text-right px-6 font-semibold text-foreground md:px-8">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                <>
+                    {/* Vue mobile : liste de cartes */}
+                    <ul className="divide-y divide-white/20 sm:hidden">
                         {products.map((product) => (
-                            <TableRow key={product.id} className="border-white/20 hover:bg-primary/5 transition-colors">
-                                <TableCell className="px-6 py-4 md:px-8">
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-muted border border-white/30 shadow-sm">
-                                            <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-foreground">{product.name}</span>
-                                            {product.featured && (
-                                                <Star className="h-3.5 w-3.5 fill-secondary text-secondary" />
-                                            )}
-                                        </div>
+                            <li key={product.id} className="flex items-center gap-3 px-4 py-4">
+                                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-muted border border-white/30 shadow-sm">
+                                    <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5">
+                                        <p className="truncate font-bold text-foreground">{product.name}</p>
+                                        {product.featured && <Star className="h-3.5 w-3.5 shrink-0 fill-secondary text-secondary" />}
                                     </div>
-                                </TableCell>
-                                <TableCell>
-                                    <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-1 text-xs font-semibold text-secondary">
-                                        {product.categories?.name || "-"}
-                                    </span>
-                                </TableCell>
-                                <TableCell className="font-bold text-gradient">
-                                    {product.price.toLocaleString()} FCFA
-                                </TableCell>
-                                <TableCell className="text-right px-6 md:px-8">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={() => openEdit(product)}>
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(product)}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                    <div className="mt-1 flex items-center gap-2">
+                                        <span className="inline-flex items-center rounded-full bg-secondary/10 px-2 py-0.5 text-[11px] font-semibold text-secondary">
+                                            {product.categories?.name || "-"}
+                                        </span>
+                                        <span className="text-sm font-bold text-gradient">
+                                            {product.price.toLocaleString()} FCFA
+                                        </span>
                                     </div>
-                                </TableCell>
-                            </TableRow>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1">
+                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10" onClick={() => openEdit(product)}>
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(product)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </li>
                         ))}
-                    </TableBody>
-                </Table>
+                    </ul>
+
+                    {/* Vue desktop : tableau */}
+                    <div className="hidden sm:block">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent border-white/30">
+                                    <TableHead className="px-6 py-4 font-semibold text-foreground md:px-8">Produit</TableHead>
+                                    <TableHead className="font-semibold text-foreground">Categorie</TableHead>
+                                    <TableHead className="font-semibold text-foreground">Prix</TableHead>
+                                    <TableHead className="text-right px-6 font-semibold text-foreground md:px-8">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {products.map((product) => (
+                                    <TableRow key={product.id} className="border-white/20 hover:bg-primary/5 transition-colors">
+                                        <TableCell className="px-6 py-4 md:px-8">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-muted border border-white/30 shadow-sm">
+                                                    <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-bold text-foreground">{product.name}</span>
+                                                    {product.featured && (
+                                                        <Star className="h-3.5 w-3.5 fill-secondary text-secondary" />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-1 text-xs font-semibold text-secondary">
+                                                {product.categories?.name || "-"}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="font-bold text-gradient">
+                                            {product.price.toLocaleString()} FCFA
+                                        </TableCell>
+                                        <TableCell className="text-right px-6 md:px-8">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={() => openEdit(product)}>
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(product)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </>
             )}
 
             <ProductFormDialog
@@ -463,33 +427,61 @@ function CategoriesTab() {
                     Aucune categorie pour le moment.
                 </div>
             ) : (
-                <Table>
-                    <TableHeader>
-                        <TableRow className="hover:bg-transparent border-white/30">
-                            <TableHead className="px-6 py-4 font-semibold text-foreground md:px-8">Nom</TableHead>
-                            <TableHead className="font-semibold text-foreground">Slug (URL)</TableHead>
-                            <TableHead className="text-right px-6 font-semibold text-foreground md:px-8">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                <>
+                    {/* Vue mobile : liste de cartes */}
+                    <ul className="divide-y divide-white/20 sm:hidden">
                         {categories.map((cat) => (
-                            <TableRow key={cat.id} className="border-white/20 hover:bg-primary/5 transition-colors">
-                                <TableCell className="px-6 py-4 font-bold text-foreground md:px-8">{cat.name}</TableCell>
-                                <TableCell className="text-muted-foreground font-mono text-sm">{cat.slug}</TableCell>
-                                <TableCell className="text-right px-6 md:px-8">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={() => openEdit(cat)}>
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(cat)}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
+                            <li key={cat.id} className="flex items-center gap-3 px-4 py-4">
+                                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-muted border border-white/30 shadow-sm">
+                                    <img src={cat.image} alt={cat.name} className="h-full w-full object-cover" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate font-bold text-foreground">{cat.name}</p>
+                                    <p className="truncate font-mono text-xs text-muted-foreground">{cat.slug}</p>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1">
+                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10" onClick={() => openEdit(cat)}>
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(cat)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </li>
                         ))}
-                    </TableBody>
-                </Table>
+                    </ul>
+
+                    {/* Vue desktop : tableau */}
+                    <div className="hidden sm:block">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent border-white/30">
+                                    <TableHead className="px-6 py-4 font-semibold text-foreground md:px-8">Nom</TableHead>
+                                    <TableHead className="font-semibold text-foreground">Slug (URL)</TableHead>
+                                    <TableHead className="text-right px-6 font-semibold text-foreground md:px-8">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {categories.map((cat) => (
+                                    <TableRow key={cat.id} className="border-white/20 hover:bg-primary/5 transition-colors">
+                                        <TableCell className="px-6 py-4 font-bold text-foreground md:px-8">{cat.name}</TableCell>
+                                        <TableCell className="text-muted-foreground font-mono text-sm">{cat.slug}</TableCell>
+                                        <TableCell className="text-right px-6 md:px-8">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={() => openEdit(cat)}>
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(cat)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </>
             )}
 
             <CategoryFormDialog
@@ -578,48 +570,81 @@ function BlogTab() {
                     Aucun article pour le moment.
                 </div>
             ) : (
-                <Table>
-                    <TableHeader>
-                        <TableRow className="hover:bg-transparent border-white/30">
-                            <TableHead className="px-6 py-4 font-semibold text-foreground md:px-8">Titre</TableHead>
-                            <TableHead className="font-semibold text-foreground">Categorie</TableHead>
-                            <TableHead className="font-semibold text-foreground">Date</TableHead>
-                            <TableHead className="text-right px-6 font-semibold text-foreground md:px-8">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                <>
+                    {/* Vue mobile : liste de cartes */}
+                    <ul className="divide-y divide-white/20 sm:hidden">
                         {posts.map((post) => (
-                            <TableRow key={post.id} className="border-white/20 hover:bg-primary/5 transition-colors">
-                                <TableCell className="px-6 py-4 md:px-8">
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-10 w-16 shrink-0 overflow-hidden rounded-lg bg-muted border border-white/30">
-                                            <img src={post.cover_image} alt={post.title} className="h-full w-full object-cover" />
-                                        </div>
-                                        <span className="font-bold text-foreground max-w-[10rem] truncate md:max-w-xs">{post.title}</span>
+                            <li key={post.id} className="flex items-center gap-3 px-4 py-4">
+                                <div className="h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-muted border border-white/30">
+                                    <img src={post.cover_image} alt={post.title} className="h-full w-full object-cover" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate font-bold text-foreground">{post.title}</p>
+                                    <div className="mt-1 flex items-center gap-2">
+                                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                                            {post.category}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">{post.published_at}</span>
                                     </div>
-                                </TableCell>
-                                <TableCell>
-                                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-                                        {post.category}
-                                    </span>
-                                </TableCell>
-                                <TableCell className="text-muted-foreground font-medium text-sm">
-                                    {post.published_at}
-                                </TableCell>
-                                <TableCell className="text-right px-6 md:px-8">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={() => openEdit(post)}>
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(post)}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1">
+                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10" onClick={() => openEdit(post)}>
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(post)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </li>
                         ))}
-                    </TableBody>
-                </Table>
+                    </ul>
+
+                    {/* Vue desktop : tableau */}
+                    <div className="hidden sm:block">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent border-white/30">
+                                    <TableHead className="px-6 py-4 font-semibold text-foreground md:px-8">Titre</TableHead>
+                                    <TableHead className="font-semibold text-foreground">Categorie</TableHead>
+                                    <TableHead className="font-semibold text-foreground">Date</TableHead>
+                                    <TableHead className="text-right px-6 font-semibold text-foreground md:px-8">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {posts.map((post) => (
+                                    <TableRow key={post.id} className="border-white/20 hover:bg-primary/5 transition-colors">
+                                        <TableCell className="px-6 py-4 md:px-8">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-10 w-16 shrink-0 overflow-hidden rounded-lg bg-muted border border-white/30">
+                                                    <img src={post.cover_image} alt={post.title} className="h-full w-full object-cover" />
+                                                </div>
+                                                <span className="font-bold text-foreground max-w-[10rem] truncate md:max-w-xs">{post.title}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                                                {post.category}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground font-medium text-sm">
+                                            {post.published_at}
+                                        </TableCell>
+                                        <TableCell className="text-right px-6 md:px-8">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={() => openEdit(post)}>
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(post)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </>
             )}
 
             <BlogFormDialog
@@ -640,6 +665,81 @@ function BlogTab() {
                 onConfirm={confirmDelete}
                 loading={deleting}
             />
+        </SectionCard>
+    );
+}
+
+function FeaturedTab() {
+    const { products, loading, refetch } = useAdminProducts();
+    const { showToast } = useToast();
+    const [savingId, setSavingId] = useState<number | null>(null);
+
+    const featuredCount = products.filter((p) => p.featured).length;
+
+    async function handleToggle(product: ProductDB) {
+        setSavingId(product.id);
+        try {
+            await toggleFeatured(product);
+            refetch();
+        } catch {
+            showToast("error", "Impossible de mettre a jour la selection.");
+        } finally {
+            setSavingId(null);
+        }
+    }
+
+    return (
+        <SectionCard title="La Selection (page d'accueil)">
+            <div className="border-b border-white/30 px-6 py-4 text-sm text-muted-foreground md:px-8">
+                {featuredCount} produit{featuredCount > 1 ? "s" : ""} actuellement mis en avant sur la page d'accueil.
+                Idealement entre 4 et 8 pieces pour un rendu equilibre. Tant qu'aucun produit n'est selectionne, les plus recents s'affichent par defaut.
+            </div>
+
+            {loading ? (
+                <div className="p-10 text-center text-sm text-muted-foreground">
+                    Chargement des produits...
+                </div>
+            ) : products.length === 0 ? (
+                <div className="p-10 text-center text-sm text-muted-foreground">
+                    Aucun produit pour le moment. Ajoute d'abord des produits dans l'onglet "Produits".
+                </div>
+            ) : (
+                <ul className="divide-y divide-white/20">
+                    {products.map((product) => (
+                        <li key={product.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-4 md:px-8">
+                            <div className="flex min-w-0 flex-1 items-center gap-4">
+                                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-muted border border-white/30 shadow-sm">
+                                    <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate font-bold text-foreground">{product.name}</p>
+                                    <p className="truncate text-sm text-muted-foreground">
+                                        {product.categories?.name || "-"} · {product.price.toLocaleString()} FCFA
+                                    </p>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => handleToggle(product)}
+                                disabled={savingId === product.id}
+                                className={
+                                    "flex shrink-0 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all disabled:opacity-50 " +
+                                    (product.featured
+                                        ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
+                                        : "border border-border/50 text-muted-foreground hover:border-primary/40 hover:text-primary")
+                                }
+                            >
+                                {savingId === product.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Star className={"h-4 w-4 " + (product.featured ? "fill-current" : "")} />
+                                )}
+                                {product.featured ? "En vedette" : "Mettre en avant"}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </SectionCard>
     );
 }
