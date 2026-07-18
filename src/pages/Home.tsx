@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import TrustBadges from "@/components/TrustBadges";
+import SectionDivider from "@/components/SectionDivider";
 import { useCategories, useProducts, useFeaturedProducts, useBlogPosts, useSiteSettings } from "@/hooks/useSupabase";
 import { motion } from "framer-motion";
 
@@ -23,7 +25,7 @@ export default function Home() {
     return (
         <div className="overflow-x-hidden">
             {/* HERO */}
-            <section className="relative isolate flex min-h-[600px] items-center overflow-hidden bg-background">
+            <section className="relative isolate flex min-h-[560px] items-center overflow-hidden bg-background pb-16">
                 <div className="blob -left-32 -top-32 h-96 w-96 bg-primary" />
                 <div className="blob -right-20 top-10 h-80 w-80 bg-secondary" style={{ animationDelay: "3s" }} />
                 <div className="blob left-1/3 bottom-0 h-72 w-72 bg-primary/70" style={{ animationDelay: "6s" }} />
@@ -46,14 +48,14 @@ export default function Home() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7 }}
-                    className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-4 py-14 text-center md:px-8 md:py-16"
+                    className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-4 py-10 text-center md:px-8 md:py-12"
                 >
                     <span className="glass flex items-center gap-2 rounded-full px-5 py-2 text-xs font-bold uppercase tracking-[0.2em] text-primary">
                         <Sparkles className="h-3.5 w-3.5" />
                         Édition exclusive
                     </span>
 
-                    <h1 className="font-display mt-8 text-4xl font-semibold leading-[1.05] text-foreground sm:text-5xl md:text-7xl">
+                    <h1 className="font-display mt-6 text-4xl font-semibold leading-[1.05] text-foreground sm:text-5xl md:text-7xl">
                         L'art de sublimer
                         <br />
                         <span className="text-gradient italic">votre quotidien</span>
@@ -63,23 +65,30 @@ export default function Home() {
                         JA ✨ Jí Yoū — des pieces selectionnees avec passion, pensees pour celles et ceux qui aiment se demarquer.
                     </p>
 
-                    <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                    <div className="mt-9 flex flex-col gap-4 sm:flex-row">
                         <Button
                             asChild
                             size="lg"
-                            className="gap-2 rounded-full bg-gradient-to-r from-primary to-secondary px-8 py-6 text-base text-white shadow-xl glow-primary hover:opacity-90"
+                            className="group gap-2 rounded-full bg-gradient-to-r from-primary to-secondary px-8 py-6 text-base text-white shadow-xl glow-primary transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95"
                         >
                             <Link to="/catalogue">
                                 Decouvrir la collection
-                                <ArrowRight className="h-5 w-5" />
+                                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                             </Link>
                         </Button>
                     </div>
                 </motion.div>
             </section>
 
+            {/* REASSURANCE */}
+            <TrustBadges />
+
+            <div className="mt-16 md:mt-20">
+                <SectionDivider />
+            </div>
+
             {/* CATEGORIES — carrousel mobile / grille desktop */}
-            <section className="py-20 md:py-24">
+            <section className="pb-20 md:pb-24">
                 <motion.h2
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -108,12 +117,12 @@ export default function Home() {
                                     alt={category.name}
                                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent transition-colors duration-500 group-hover:from-black/70" />
                                 <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                                    <span className="font-display text-2xl font-semibold text-white">
+                                    <span className="font-display text-2xl font-semibold text-white transition-transform duration-500 group-hover:-translate-y-1">
                                         {category.name}
                                     </span>
-                                    <span className="glass flex h-10 w-10 items-center justify-center rounded-full text-white">
+                                    <span className="glass flex h-10 w-10 items-center justify-center rounded-full text-white transition-transform duration-500 group-hover:translate-x-1">
                                         <ArrowRight className="h-4 w-4" />
                                     </span>
                                 </div>
@@ -122,6 +131,8 @@ export default function Home() {
                     ))}
                 </div>
             </section>
+
+            <SectionDivider flip />
 
             {/* LA SELECTION — carrousel mobile / grille desktop */}
             <section className="relative overflow-hidden bg-accent/40 py-20 md:py-24">
@@ -178,6 +189,8 @@ export default function Home() {
                 </div>
             </section>
 
+            <SectionDivider />
+
             {/* BLOG */}
             <section className="mx-auto max-w-7xl px-4 py-20 md:py-24 md:px-8">
                 <div className="flex items-end justify-between mb-10">
@@ -229,7 +242,7 @@ export default function Home() {
                         Notre equipe vous repond directement sur WhatsApp.
                     </p>
                     <div className="mt-8 flex justify-center">
-                        <WhatsAppButton className="rounded-full px-8 py-4 text-base" />
+                        <WhatsAppButton className="rounded-full px-8 py-4 text-base transition-transform duration-300 hover:scale-105" />
                     </div>
                 </div>
             </section>
