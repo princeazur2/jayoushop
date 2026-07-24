@@ -23,23 +23,19 @@ export default function Header() {
 
     return (
         <header className="sticky top-0 z-50 w-full glass shadow-sm">
-            <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-8">
+            <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
                 <Link to="/" className="flex items-center gap-2">
                     {settings?.logo_url ? (
                         <img
                             src={settings.logo_url}
-                            alt="Logo"
-                            className="h-12 w-auto object-contain"
+                            alt={settings?.shop_name || "Logo"}
+                            className="h-9 w-auto object-contain"
                         />
                     ) : (
-                        <div className="flex flex-col leading-none">
-                            <span className="font-display text-2xl font-semibold tracking-tight text-foreground">
-                                JA <Sparkles className="inline h-4 w-4 text-secondary -mt-2" />
-                            </span>
-                            <span className="font-display text-xs italic text-primary">
-                                Jí Yoū
-                            </span>
-                        </div>
+                        <span className="font-display flex items-center gap-1.5 text-xl font-semibold tracking-tight text-foreground">
+                            {settings?.shop_name || "JA Jí Yoū"}
+                            <Sparkles className="h-4 w-4 text-secondary" />
+                        </span>
                     )}
                 </Link>
 

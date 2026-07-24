@@ -108,6 +108,7 @@ src/
   App.tsx
   index.css
   main.tsx
+  vite-env.d.ts
 .gitignore
 .oxlintrc.json
 components.json
@@ -125,118 +126,6 @@ vite.config.ts
 
 <files>
 This section contains the contents of the repository's files.
-
-<file path="src/components/CoverCarousel.tsx">
-import { useRef, useState, useEffect, useCallback, type ReactNode } from "react";
-
-interface CoverCarouselProps {
-    children: ReactNode[];
-}
-
-/**
- * Carrousel inspire "Cover Flow / Netflix" : les cartes se retrouvent
- * mises a l'echelle et legerement inclinees selon leur distance au centre
- * du conteneur visible. Fonctionne au scroll tactile (mobile) et a la molette
- * (desktop), sans dependance externe.
- */
-export default function CoverCarousel({ children }: CoverCarouselProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-    const [transforms, setTransforms] = useState(
-        children.map(() => ({ scale: 1, rotate: 0, opacity: 1 }))
-    );
-
-    const updateTransforms = useCallback(() => {
-        const container = containerRef.current;
-        if (!container) return;
-        const containerCenter = container.scrollLeft + container.clientWidth / 2;
-
-        const next = itemRefs.current.map((el) => {
-            if (!el) return { scale: 1, rotate: 0, opacity: 1 };
-            const itemCenter = el.offsetLeft + el.offsetWidth / 2;
-            const distance = itemCenter - containerCenter;
-            const normalized = Math.min(Math.abs(distance) / (container.clientWidth / 2 + 1), 1);
-            const scale = 1 - normalized * 0.16;
-            const rotate = (distance > 0 ? -1 : 1) * normalized * 8;
-            const opacity = 1 - normalized * 0.3;
-            return { scale, rotate, opacity };
-        });
-
-        setTransforms(next);
-    }, []);
-
-    useEffect(() => {
-        updateTransforms();
-        const container = containerRef.current;
-        if (!container) return;
-
-        let raf = 0;
-        const onScroll = () => {
-            cancelAnimationFrame(raf);
-            raf = requestAnimationFrame(updateTransforms);
-        };
-
-        container.addEventListener("scroll", onScroll, { passive: true });
-        window.addEventListener("resize", onScroll);
-        return () => {
-            container.removeEventListener("scroll", onScroll);
-            window.removeEventListener("resize", onScroll);
-            cancelAnimationFrame(raf);
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [updateTransforms, children.length]);
-
-    return (
-        <div
-            ref={containerRef}
-            className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto px-[12vw] pb-4 [perspective:1400px] md:px-8"
-        >
-            {children.map((child, i) => (
-                <div
-                    key={i}
-                    ref={(el) => {
-                        itemRefs.current[i] = el;
-                    }}
-                    className="w-[64vw] shrink-0 snap-center will-change-transform sm:w-[42vw] md:w-[260px] lg:w-[280px]"
-                    style={{
-                        transform: `scale(${transforms[i]?.scale ?? 1}) rotateY(${transforms[i]?.rotate ?? 0}deg)`,
-                        opacity: transforms[i]?.opacity ?? 1,
-                        transition: "transform 0.12s ease-out, opacity 0.12s ease-out",
-                    }}
-                >
-                    {child}
-                </div>
-            ))}
-        </div>
-    );
-}
-</file>
-
-<file path="src/hooks/useIsTouchDevice.ts">
-import { useEffect, useState } from "react";
-
-/**
- * Detecte si l'utilisateur navigue principalement au toucher (mobile/tablette)
- * plutot qu'a la souris. Permet de desactiver les effets qui dependent du survol
- * (tilt 3D, hover complexe) sur les appareils tactiles, ou l'appareil ne peut
- * de toute facon pas les declencher correctement, et ou ils coutent des
- * ressources GPU inutiles.
- */
-export function useIsTouchDevice() {
-    const [isTouch, setIsTouch] = useState(true);
-
-    useEffect(() => {
-        const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
-        setIsTouch(!mq.matches);
-
-        const handler = (e: MediaQueryListEvent) => setIsTouch(!e.matches);
-        mq.addEventListener("change", handler);
-        return () => mq.removeEventListener("change", handler);
-    }, []);
-
-    return isTouch;
-}
-</file>
 
 <file path="public/favicon.svg">
 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="46" fill="none" viewBox="0 0 48 46"><path fill="#863bff" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" style="fill:#863bff;fill:color(display-p3 .5252 .23 1);fill-opacity:1"/><mask id="a" width="48" height="46" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M25.842 44.938c-.664.844-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.183c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.498 0-3.579-1.842-3.579H1.133c-.92 0-1.456-1.04-.92-1.787L9.91.473c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.578 1.842 3.578h11.377c.943 0 1.473 1.088.89 1.832L25.843 44.94z" style="fill:#000;fill-opacity:1"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#ede6ff" rx="5.508" ry="14.704" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -4.47 31.516)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#ede6ff" rx="10.399" ry="29.851" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -39.328 7.883)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#7e14ff" rx="5.508" ry="30.487" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -25.913 -14.639)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -32.644 -3.334)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -34.34 30.47)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#ede6ff" rx="14.072" ry="22.078" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="rotate(93.35 24.506 48.493)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx=".387" cy="8.972" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(39.51 .387 8.972)"/></g><g filter="url(#k)"><ellipse cx="47.523" cy="-6.092" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 47.523 -6.092)"/></g><g filter="url(#l)"><ellipse cx="41.412" cy="6.333" fill="#47bfff" rx="5.971" ry="9.665" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 41.412 6.333)"/></g><g filter="url(#m)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#n)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#o)"><ellipse cx="35.651" cy="29.907" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 35.651 29.907)"/></g><g filter="url(#p)"><ellipse cx="38.418" cy="32.4" fill="#47bfff" rx="5.971" ry="15.297" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 38.418 32.4)"/></g></g><defs><filter id="b" width="60.045" height="41.654" x="-19.77" y="16.149" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-54.613" y="-7.533" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-49.64" y="2.03" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-45.045" y="20.029" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-43.513" y="21.178" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="15.756" y="-17.901" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-27.636" y="-22.853" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="20.116" y="-38.415" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="24.641" y="-11.323" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="8.244" y="-2.416" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="18.713" y="10.588" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter></defs></svg>
@@ -603,160 +492,6 @@ export default function Footer() {
                 </div>
             </div>
         </footer>
-    );
-}
-</file>
-
-<file path="src/components/layout/Header.tsx">
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { Menu, Search, ShoppingBag, X, Sparkles } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useCart } from "@/stores/useCart";
-import { useSiteSettings } from "@/hooks/useSupabase";
-import SearchDialog from "@/components/SearchDialog";
-
-const navLinks = [
-    { label: "Accueil", path: "/" },
-    { label: "Catalogue", path: "/catalogue" },
-    { label: "Blog", path: "/blog" },
-];
-
-export default function Header() {
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [searchOpen, setSearchOpen] = useState(false);
-    const { totalItems, setIsOpen } = useCart();
-    const cartCount = totalItems();
-    const { settings } = useSiteSettings();
-
-    return (
-        <header className="sticky top-0 z-50 w-full glass shadow-sm">
-            <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-8">
-                <Link to="/" className="flex items-center gap-2">
-                    {settings?.logo_url ? (
-                        <img
-                            src={settings.logo_url}
-                            alt="Logo"
-                            className="h-12 w-auto object-contain"
-                        />
-                    ) : (
-                        <div className="flex flex-col leading-none">
-                            <span className="font-display text-2xl font-semibold tracking-tight text-foreground">
-                                JA <Sparkles className="inline h-4 w-4 text-secondary -mt-2" />
-                            </span>
-                            <span className="font-display text-xs italic text-primary">
-                                Jí Yoū
-                            </span>
-                        </div>
-                    )}
-                </Link>
-
-                <nav className="hidden items-center gap-1 rounded-full glass px-2 py-1.5 md:flex">
-                    {navLinks.map((link) => (
-                        <NavLink
-                            key={link.path}
-                            to={link.path}
-                            className={({ isActive }) =>
-                                `relative rounded-full px-4 py-2 text-sm font-semibold transition-colors ${isActive
-                                    ? "text-white"
-                                    : "text-foreground/70 hover:text-foreground"
-                                }`
-                            }
-                        >
-                            {({ isActive }) => (
-                                <>
-                                    {isActive && (
-                                        <motion.span
-                                            layoutId="nav-pill"
-                                            className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-primary to-secondary shadow-md"
-                                            transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                                        />
-                                    )}
-                                    {link.label}
-                                </>
-                            )}
-                        </NavLink>
-                    ))}
-                </nav>
-
-                <div className="flex items-center gap-2">
-                    <motion.button
-                        whileHover={{ scale: 1.08 }}
-                        whileTap={{ scale: 0.92 }}
-                        className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-primary/10"
-                        onClick={() => setSearchOpen(true)}
-                    >
-                        <Search className="h-5 w-5" />
-                    </motion.button>
-
-                    <motion.button
-                        whileHover={{ scale: 1.08 }}
-                        whileTap={{ scale: 0.92 }}
-                        className="relative flex h-11 w-11 items-center justify-center rounded-full hover:bg-primary/10"
-                        onClick={() => setIsOpen(true)}
-                    >
-                        <ShoppingBag className="h-5 w-5" />
-                        <AnimatePresence>
-                            {cartCount > 0 && (
-                                <motion.div
-                                    key={cartCount}
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    exit={{ scale: 0 }}
-                                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                                    className="absolute -right-1 -top-1"
-                                >
-                                    <Badge className="h-5 w-5 justify-center rounded-full bg-gradient-to-r from-primary to-secondary p-0 text-[11px] text-white shadow-sm">
-                                        {cartCount}
-                                    </Badge>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </motion.button>
-
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full hover:bg-primary/10 md:hidden"
-                        onClick={() => setMobileOpen((o) => !o)}
-                    >
-                        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                    </Button>
-                </div>
-            </div>
-
-            <AnimatePresence>
-                {mobileOpen && (
-                    <motion.nav
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="flex flex-col gap-1 overflow-hidden border-t border-white/30 glass px-4 py-4 md:hidden"
-                    >
-                        {navLinks.map((link) => (
-                            <NavLink
-                                key={link.path}
-                                to={link.path}
-                                onClick={() => setMobileOpen(false)}
-                                className={({ isActive }) =>
-                                    `rounded-xl px-3 py-3 text-sm font-semibold ${isActive
-                                        ? "bg-gradient-to-r from-primary to-secondary text-white"
-                                        : "text-foreground/80 hover:bg-primary/10"
-                                    }`
-                                }
-                            >
-                                {link.label}
-                            </NavLink>
-                        ))}
-                    </motion.nav>
-                )}
-            </AnimatePresence>
-
-            <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
-        </header>
     );
 }
 </file>
@@ -1213,196 +948,88 @@ export default function AdminRoute({ children }: { children: ReactNode }) {
 }
 </file>
 
-<file path="src/components/CartDrawer.tsx">
-import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import { useCart } from "@/stores/useCart";
-import { getCartWhatsAppLink } from "@/lib/whatsapp";
-import { motion, AnimatePresence } from "framer-motion";
+<file path="src/components/CoverCarousel.tsx">
+import { useRef, useState, useEffect, useCallback, type ReactNode } from "react";
 
-export default function CartDrawer() {
-    const {
-        items,
-        isOpen,
-        setIsOpen,
-        removeItem,
-        updateQuantity,
-        totalPrice,
-        clearCart,
-    } = useCart();
-
-    const whatsappLink = getCartWhatsAppLink(
-        items.map((i) => ({
-            name: i.name,
-            quantity: i.quantity,
-            price: i.price,
-        }))
-    );
-
-    const isEmpty = items.length === 0;
-    const total = totalPrice();
-
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <>
-                    {/* Overlay de fond */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-                        onClick={() => setIsOpen(false)}
-                    />
-
-                    {/* Panier latéral */}
-                    <motion.div
-                        initial={{ x: "100%" }}
-                        animate={{ x: 0 }}
-                        exit={{ x: "100%" }}
-                        transition={{ type: "spring", damping: 26, stiffness: 220 }}
-                        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-background shadow-premium-xl border-l border-border/50"
-                    >
-                        {/* En-tête */}
-                        <div className="flex items-center justify-between border-b border-border/50 px-6 py-5">
-                            <h2 className="font-display text-xl font-semibold text-foreground">
-                                Votre panier
-                            </h2>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="magnetic-btn rounded-full p-2 text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-
-                        {/* Contenu principal */}
-                        <div className="flex-1 overflow-y-auto px-6 py-4">
-                            {isEmpty ? (
-                                <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-                                    <div className="rounded-full bg-muted p-6 animate-float-soft">
-                                        <ShoppingBag className="h-10 w-10 text-muted-foreground/50" />
-                                    </div>
-                                    <p className="text-sm text-muted-foreground font-medium">
-                                        Votre panier est tristement vide
-                                    </p>
-                                </div>
-                            ) : (
-                                <ul className="flex flex-col gap-6">
-                                    {items.map((item) => (
-                                        <CartLine
-                                            key={item.id}
-                                            id={item.id}
-                                            name={item.name}
-                                            image={item.image}
-                                            price={item.price}
-                                            quantity={item.quantity}
-                                            onRemove={removeItem}
-                                            onUpdateQuantity={updateQuantity}
-                                        />
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-
-                        {/* Pied de page (si panier non vide) */}
-                        {!isEmpty && (
-                            <div className="border-t border-border/50 bg-muted/20 px-6 py-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                                        Total estimé
-                                    </span>
-                                    <span className="font-display text-2xl font-bold text-foreground">
-                                        {total.toLocaleString()} FCFA
-                                    </span>
-                                </div>
-
-                                {/* Correction apportée ici : Réintégration de la balise ouvrante <a> */}
-                                <a
-                                    href={whatsappLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="magnetic-btn flex w-full items-center justify-center gap-2 rounded-xl bg-[#25d366] py-4 text-sm font-bold text-white shadow-lg hover:shadow-xl"
-                                >
-                                    Commander via WhatsApp
-                                </a>
-
-                                <button
-                                    onClick={clearCart}
-                                    className="mt-4 w-full py-2 text-xs font-semibold text-muted-foreground hover:text-destructive transition-colors"
-                                >
-                                    Vider le panier
-                                </button>
-                            </div>
-                        )}
-                    </motion.div>
-                </>
-            )}
-        </AnimatePresence>
-    );
+interface CoverCarouselProps {
+    children: ReactNode[];
 }
 
-interface CartLineProps {
-    id: number;
-    name: string;
-    image: string;
-    price: number;
-    quantity: number;
-    onRemove: (id: number) => void;
-    onUpdateQuantity: (id: number, quantity: number) => void;
-}
+/**
+ * Carrousel inspire "Cover Flow / Netflix" : les cartes se retrouvent
+ * mises a l'echelle et legerement inclinees selon leur distance au centre
+ * du conteneur visible. Fonctionne au scroll tactile (mobile) et a la molette
+ * (desktop), sans dependance externe.
+ */
+export default function CoverCarousel({ children }: CoverCarouselProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const [transforms, setTransforms] = useState(
+        children.map(() => ({ scale: 1, rotate: 0, opacity: 1 }))
+    );
 
-function CartLine({ id, name, image, price, quantity, onRemove, onUpdateQuantity }: CartLineProps) {
-    const lineTotal = price * quantity;
+    const updateTransforms = useCallback(() => {
+        const container = containerRef.current;
+        if (!container) return;
+        const containerCenter = container.scrollLeft + container.clientWidth / 2;
+
+        const next = itemRefs.current.map((el) => {
+            if (!el) return { scale: 1, rotate: 0, opacity: 1 };
+            const itemCenter = el.offsetLeft + el.offsetWidth / 2;
+            const distance = itemCenter - containerCenter;
+            const normalized = Math.min(Math.abs(distance) / (container.clientWidth / 2 + 1), 1);
+            const scale = 1 - normalized * 0.16;
+            const rotate = (distance > 0 ? -1 : 1) * normalized * 8;
+            const opacity = 1 - normalized * 0.3;
+            return { scale, rotate, opacity };
+        });
+
+        setTransforms(next);
+    }, []);
+
+    useEffect(() => {
+        updateTransforms();
+        const container = containerRef.current;
+        if (!container) return;
+
+        let raf = 0;
+        const onScroll = () => {
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(updateTransforms);
+        };
+
+        container.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll);
+        return () => {
+            container.removeEventListener("scroll", onScroll);
+            window.removeEventListener("resize", onScroll);
+            cancelAnimationFrame(raf);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [updateTransforms, children.length]);
 
     return (
-        <li className="flex gap-4 group">
-            <div className="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-muted/50 border border-border/40">
-                <img
-                    src={image}
-                    alt={name}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-            </div>
-
-            <div className="flex flex-1 flex-col justify-center py-1">
-                <div className="flex items-start justify-between gap-2">
-                    <p className="font-display text-base font-semibold text-foreground">
-                        {name}
-                    </p>
-                    <button
-                        onClick={() => onRemove(id)}
-                        className="text-muted-foreground hover:text-destructive transition-colors p-1"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </button>
+        <div
+            ref={containerRef}
+            className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto px-[12vw] pb-4 [perspective:1400px] md:px-8"
+        >
+            {children.map((child, i) => (
+                <div
+                    key={i}
+                    ref={(el) => {
+                        itemRefs.current[i] = el;
+                    }}
+                    className="w-[64vw] shrink-0 snap-center will-change-transform sm:w-[42vw] md:w-[260px] lg:w-[280px]"
+                    style={{
+                        transform: `scale(${transforms[i]?.scale ?? 1}) rotateY(${transforms[i]?.rotate ?? 0}deg)`,
+                        opacity: transforms[i]?.opacity ?? 1,
+                        transition: "transform 0.12s ease-out, opacity 0.12s ease-out",
+                    }}
+                >
+                    {child}
                 </div>
-
-                <p className="font-display text-sm text-primary mb-3">
-                    {lineTotal.toLocaleString()} FCFA
-                </p>
-
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => onUpdateQuantity(id, quantity - 1)}
-                        className="magnetic-btn flex h-8 w-8 items-center justify-center rounded-full border border-border hover:bg-foreground/5"
-                    >
-                        <Minus className="h-3 w-3" />
-                    </button>
-                    <span className="w-4 text-center text-sm font-medium">
-                        {quantity}
-                    </span>
-                    <button
-                        onClick={() => onUpdateQuantity(id, quantity + 1)}
-                        className="magnetic-btn flex h-8 w-8 items-center justify-center rounded-full border border-border hover:bg-foreground/5"
-                    >
-                        <Plus className="h-3 w-3" />
-                    </button>
-                </div>
-            </div>
-        </li>
+            ))}
+        </div>
     );
 }
 </file>
@@ -1558,117 +1185,6 @@ export default function ImageUploadField({
                 </div>
             </div>
         </div>
-    );
-}
-</file>
-
-<file path="src/components/ProductCard.tsx">
-import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ShoppingBag, Check } from "lucide-react";
-import type { Product } from "@/data/mock";
-import { useCart } from "@/stores/useCart";
-import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
-
-export default function ProductCard({ product }: { product: Product }) {
-    const cardRef = useRef<HTMLDivElement>(null);
-    const [tilt, setTilt] = useState({ x: 0, y: 0 });
-    const [added, setAdded] = useState(false);
-    const { addItem, setIsOpen } = useCart();
-    const isTouch = useIsTouchDevice();
-
-    // Le tilt 3D au survol n'a de sens qu'avec une souris : sur mobile on le
-    // desactive completement pour eviter tout calcul inutile a chaque frame.
-    function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-        if (isTouch) return;
-        const card = cardRef.current;
-        if (!card) return;
-        const rect = card.getBoundingClientRect();
-        const px = (e.clientX - rect.left) / rect.width - 0.5;
-        const py = (e.clientY - rect.top) / rect.height - 0.5;
-        setTilt({ x: py * -8, y: px * 10 });
-    }
-
-    function handleMouseLeave() {
-        if (isTouch) return;
-        setTilt({ x: 0, y: 0 });
-    }
-
-    function handleQuickAdd(e: React.MouseEvent) {
-        e.preventDefault();
-        e.stopPropagation();
-        addItem({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            image: product.image,
-        });
-        setAdded(true);
-        setTimeout(() => {
-            setAdded(false);
-            setIsOpen(true);
-        }, 500);
-    }
-
-    return (
-        <Link to={`/produit/${product.id}`} className="group block">
-            <div
-                ref={cardRef}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-                className="tilt-card overflow-hidden rounded-2xl bg-card border border-border/40 shadow-sm transition-shadow duration-300 active:shadow-premium sm:hover:shadow-premium-lg"
-                style={
-                    isTouch
-                        ? undefined
-                        : { transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }
-                }
-            >
-                <div className="aspect-[4/5] overflow-hidden bg-muted/30 relative">
-                    <img
-                        src={product.image}
-                        alt={product.name}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-full w-full object-cover transition-transform duration-700 ease-out sm:group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 sm:group-hover:opacity-100" />
-
-                    {/* Sur tactile, il n'y a pas de "survol" : le bouton reste visible en permanence
-                        pour que l'ajout rapide au panier soit toujours accessible d'un tap. */}
-                    <motion.button
-                        onClick={handleQuickAdd}
-                        whileTap={{ scale: 0.9 }}
-                        className={
-                            "touch-target absolute bottom-3 right-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-foreground shadow-md transition-all duration-300 sm:h-10 sm:w-10 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:hover:bg-white " +
-                            (isTouch ? "opacity-100 translate-y-0" : "")
-                        }
-                        aria-label="Ajouter au panier"
-                    >
-                        {added ? (
-                            <Check className="h-4 w-4 text-success" />
-                        ) : (
-                            <ShoppingBag className="h-4 w-4" />
-                        )}
-                    </motion.button>
-                </div>
-
-                <div
-                    className="p-5 flex flex-col gap-1"
-                    style={isTouch ? undefined : { transform: "translateZ(20px)" }}
-                >
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                        {product.categoryName}
-                    </span>
-                    <h3 className="font-display text-lg text-foreground sm:group-hover:text-primary transition-colors">
-                        {product.name}
-                    </h3>
-                    <p className="font-display text-xl text-primary font-medium mt-1">
-                        {product.price.toLocaleString()} FCFA
-                    </p>
-                </div>
-            </div>
-        </Link>
     );
 }
 </file>
@@ -2072,6 +1588,32 @@ export const mockBlogPosts: BlogPost[] = [
         publishedAt: "2025-03-10",
     },
 ];
+</file>
+
+<file path="src/hooks/useIsTouchDevice.ts">
+import { useEffect, useState } from "react";
+
+/**
+ * Detecte si l'utilisateur navigue principalement au toucher (mobile/tablette)
+ * plutot qu'a la souris. Permet de desactiver les effets qui dependent du survol
+ * (tilt 3D, hover complexe) sur les appareils tactiles, ou l'appareil ne peut
+ * de toute facon pas les declencher correctement, et ou ils coutent des
+ * ressources GPU inutiles.
+ */
+export function useIsTouchDevice() {
+    const [isTouch, setIsTouch] = useState(true);
+
+    useEffect(() => {
+        const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+        setIsTouch(!mq.matches);
+
+        const handler = (e: MediaQueryListEvent) => setIsTouch(!e.matches);
+        mq.addEventListener("change", handler);
+        return () => mq.removeEventListener("change", handler);
+    }, []);
+
+    return isTouch;
+}
 </file>
 
 <file path="src/hooks/useSupabase.ts">
@@ -2990,179 +2532,6 @@ export default function BlogDetail() {
 }
 </file>
 
-<file path="src/pages/Catalogue.tsx">
-import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { PackageX, SlidersHorizontal } from "lucide-react";
-import { useCategories, useProducts } from "@/hooks/useSupabase";
-import { motion, AnimatePresence } from "framer-motion";
-import ProductCard from "@/components/ProductCard";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-
-export default function Catalogue() {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const activeSlug = searchParams.get("category") ?? undefined;
-    const [sort, setSort] = useState<"recent" | "price_asc" | "price_desc">("recent");
-
-    const { categories } = useCategories();
-    const { products, loading } = useProducts(activeSlug);
-
-    const sortedProducts = useMemo(() => {
-        return [...products].sort((a, b) => {
-            if (sort === "price_asc") return a.price - b.price;
-            if (sort === "price_desc") return b.price - a.price;
-            return b.id - a.id;
-        });
-    }, [products, sort]);
-
-    function handleCategoryClick(slug?: string) {
-        if (slug) {
-            setSearchParams({ category: slug });
-        } else {
-            setSearchParams({});
-        }
-    }
-
-    return (
-        <div className="relative min-h-screen overflow-hidden bg-background pb-24">
-            <div className="blob -right-40 top-0 h-96 w-96 bg-primary/70" />
-            <div className="blob -left-32 top-64 h-72 w-72 bg-secondary/60" style={{ animationDelay: "4s" }} />
-
-            <section className="relative py-14 md:py-24 border-b border-border/30">
-                <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="relative z-10 mx-auto max-w-7xl px-4 text-center md:px-8"
-                >
-                    <span className="glass-light inline-block rounded-full px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                        La collection complete
-                    </span>
-                    <h1 className="font-display mt-6 text-3xl font-semibold text-foreground sm:text-4xl md:text-6xl">
-                        Notre <span className="text-gradient italic">catalogue</span>
-                    </h1>
-                    <p className="mt-4 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                        {sortedProducts.length} article{sortedProducts.length > 1 ? "s" : ""}
-                    </p>
-                </motion.div>
-            </section>
-
-            {/* Barre de filtres : sticky sur mobile pour rester accessible pendant le
-                scroll, sans reposer sur un backdrop-filter lourd empile en continu. */}
-            <section className="sticky top-20 z-30 -mx-4 border-b border-border/30 bg-background/95 px-4 py-4 backdrop-blur-sm md:static md:mx-0 md:border-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
-                <div className="mx-auto max-w-7xl md:px-8">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1 md:flex-wrap md:gap-3 md:pb-0">
-                            <button
-                                onClick={() => handleCategoryClick(undefined)}
-                                className={
-                                    "touch-target shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition-colors duration-200 " +
-                                    (!activeSlug
-                                        ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
-                                        : "glass-light text-foreground")
-                                }
-                            >
-                                Tous
-                            </button>
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => handleCategoryClick(cat.slug)}
-                                    className={
-                                        "touch-target shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition-colors duration-200 " +
-                                        (activeSlug === cat.slug
-                                            ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
-                                            : "glass-light text-foreground")
-                                    }
-                                >
-                                    {cat.name}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="flex items-center gap-2 glass-light rounded-2xl p-1.5 self-start md:self-auto">
-                            <div className="pl-3 text-primary shrink-0">
-                                <SlidersHorizontal className="h-4 w-4" />
-                            </div>
-                            <Select value={sort} onValueChange={(value) => setSort(value as typeof sort)}>
-                                <SelectTrigger className="w-[170px] border-none bg-transparent shadow-none font-medium">
-                                    <SelectValue placeholder="Trier par" />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-xl shadow-premium">
-                                    <SelectItem value="recent">Plus recents</SelectItem>
-                                    <SelectItem value="price_asc">Prix croissant</SelectItem>
-                                    <SelectItem value="price_desc">Prix decroissant</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:px-8">
-                {loading ? (
-                    <div className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-4">
-                        {Array.from({ length: 8 }).map((_, i) => (
-                            <div key={i}>
-                                <div className="aspect-[4/5] rounded-2xl shimmer-bg" />
-                                <div className="mt-4 h-4 w-3/4 rounded shimmer-bg" />
-                                <div className="mt-2 h-4 w-1/2 rounded shimmer-bg" />
-                            </div>
-                        ))}
-                    </div>
-                ) : sortedProducts.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center gap-4 py-32">
-                        <div className="glass-light rounded-full p-6">
-                            <PackageX className="h-10 w-10 text-primary/60" />
-                        </div>
-                        <p className="text-base font-medium text-muted-foreground text-center px-4">
-                            Aucun produit trouve dans cette categorie.
-                        </p>
-                    </div>
-                ) : (
-                    // Pas d'animation "layout" FLIP sur chaque carte ici : avec beaucoup
-                    // d'articles, ce recalcul de mise en page peut saccader sur un GPU
-                    // Android d'entree de gamme. On garde uniquement un fondu simple,
-                    // peu couteux et deja tres agreable a l'oeil.
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeSlug ?? "all"}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.25 }}
-                            className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-4"
-                        >
-                            {sortedProducts.map((product) => (
-                                <ProductCard
-                                    key={product.id}
-                                    product={{
-                                        id: product.id,
-                                        name: product.name,
-                                        description: product.description,
-                                        price: product.price,
-                                        image: product.image,
-                                        categoryId: product.category_id,
-                                        categoryName: product.categories?.name ?? "",
-                                        sku: "",
-                                    }}
-                                />
-                            ))}
-                        </motion.div>
-                    </AnimatePresence>
-                )}
-            </section>
-        </div>
-    );
-}
-</file>
-
 <file path="src/pages/NotFound.tsx">
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -3180,263 +2549,6 @@ export default function NotFound() {
             <Button asChild className="mt-8">
                 <Link to="/">Retour à l'accueil</Link>
             </Button>
-        </div>
-    );
-}
-</file>
-
-<file path="src/pages/ProductDetail.tsx">
-import { Link, useParams } from "react-router-dom";
-import { ShieldCheck, ShoppingBag, Truck, ChevronLeft, Sparkles, Check } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import WhatsAppButton from "@/components/WhatsAppButton";
-import ProductCard from "@/components/ProductCard";
-import { useCart } from "@/stores/useCart";
-import { useProduct, useProducts } from "@/hooks/useSupabase";
-import { getWhatsAppLink } from "@/lib/whatsapp";
-import type { ProductDB } from "@/lib/supabase";
-
-export default function ProductDetail() {
-    const { id } = useParams<{ id: string }>();
-    const { product, loading } = useProduct(Number(id));
-    const { products: allProducts } = useProducts();
-
-    if (loading) {
-        return <ProductSkeleton />;
-    }
-
-    if (!product) {
-        return <ProductNotFound />;
-    }
-
-    const relatedProducts = allProducts
-        .filter((p) => p.category_id === product.category_id && p.id !== product.id)
-        .slice(0, 4);
-
-    return (
-        <div className="relative min-h-screen overflow-hidden bg-background pb-32 md:pb-20">
-            <div className="blob -right-32 top-0 h-96 w-96 bg-primary/50 hidden sm:block" />
-            <div className="blob left-0 top-96 h-72 w-72 bg-secondary/40 hidden sm:block" />
-
-            <BackLink />
-
-            <section className="relative z-10 mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8 lg:py-12">
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-20 items-center">
-                    <ProductImage src={product.image} alt={product.name} />
-                    <ProductInfo product={product} />
-                </div>
-            </section>
-
-            {relatedProducts.length > 0 && (
-                <RelatedProducts products={relatedProducts} />
-            )}
-
-            <MobileActionBar product={product} />
-        </div>
-    );
-}
-
-function ProductSkeleton() {
-    return (
-        <div className="mx-auto max-w-7xl px-4 py-8 md:py-12 md:px-8">
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
-                <div className="aspect-[4/5] rounded-[2rem] shimmer-bg" />
-                <div className="flex flex-col gap-4 pt-4 md:pt-8">
-                    <div className="h-4 w-1/4 rounded shimmer-bg" />
-                    <div className="h-10 w-3/4 rounded shimmer-bg" />
-                    <div className="h-8 w-1/3 rounded shimmer-bg" />
-                    <div className="h-24 w-full rounded shimmer-bg" />
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function ProductNotFound() {
-    return (
-        <div className="mx-auto flex min-h-[60vh] max-w-7xl flex-col items-center justify-center px-4 text-center">
-            <p className="font-display text-3xl font-bold text-foreground">
-                Produit introuvable
-            </p>
-            <Link to="/catalogue" className="mt-6 flex items-center gap-2 text-sm font-semibold text-primary hover:text-secondary transition-colors">
-                <ChevronLeft className="h-4 w-4" />
-                Retour au catalogue
-            </Link>
-        </div>
-    );
-}
-
-function BackLink() {
-    return (
-        <div className="relative z-10 mx-auto max-w-7xl px-4 pt-6 md:pt-8 md:px-8">
-            <Link to="/catalogue" className="touch-target inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors -ml-2">
-                <ChevronLeft className="h-4 w-4" />
-                Retour
-            </Link>
-        </div>
-    );
-}
-
-function ProductImage({ src, alt }: { src: string; alt: string }) {
-    return (
-        <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-muted/30 shadow-sm animate-fade-up">
-            <img src={src} alt={alt} loading="eager" decoding="async" className="h-full w-full object-cover" />
-        </div>
-    );
-}
-
-function ProductInfo({ product }: { product: ProductDB }) {
-    const { addItem, setIsOpen } = useCart();
-    const [added, setAdded] = useState(false);
-
-    function handleAddToCart() {
-        addItem({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            image: product.image,
-        });
-        setAdded(true);
-        setTimeout(() => {
-            setAdded(false);
-            setIsOpen(true);
-        }, 450);
-    }
-
-    const cartLabel = added ? "Ajoute !" : "Ajouter au panier";
-    const categoryName = product.categories?.name ?? "";
-
-    return (
-        <div className="flex flex-col justify-center">
-            <span className="glass-light inline-flex w-fit items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                <Sparkles className="h-3 w-3" />
-                {categoryName}
-            </span>
-
-            <h1 className="font-display mt-4 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
-                {product.name}
-            </h1>
-
-            <p className="font-display text-gradient mt-5 text-2xl font-semibold sm:text-3xl">
-                {product.price.toLocaleString()} FCFA
-            </p>
-
-            <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">
-                {product.description}
-            </p>
-
-            <div className="mt-8 hidden flex-col gap-4 sm:flex sm:flex-row">
-                <WhatsAppButton
-                    product={{ name: product.name, price: product.price }}
-                    className="flex-1 rounded-full py-4 text-base"
-                />
-                <Button
-                    variant="outline"
-                    size="lg"
-                    className="flex-1 gap-2 rounded-full py-4 text-base glass-light border-primary/30 hover:bg-primary/10"
-                    onClick={handleAddToCart}
-                >
-                    <AddToCartIcon added={added} />
-                    {cartLabel}
-                </Button>
-            </div>
-
-            <TrustBox />
-        </div>
-    );
-}
-
-function AddToCartIcon({ added }: { added: boolean }) {
-    if (added) {
-        return <Check className="h-5 w-5 text-success" />;
-    }
-    return <ShoppingBag className="h-5 w-5" />;
-}
-
-function TrustBox() {
-    return (
-        <div className="mt-10 flex flex-col gap-4 rounded-3xl glass-light p-5 md:p-6">
-            <div className="flex items-center gap-4 text-sm font-medium text-foreground/80">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white">
-                    <Truck className="h-5 w-5" />
-                </div>
-                Livraison rapide disponible
-            </div>
-            <div className="flex items-center gap-4 text-sm font-medium text-foreground/80">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white">
-                    <ShieldCheck className="h-5 w-5" />
-                </div>
-                Paiement securise a la livraison
-            </div>
-        </div>
-    );
-}
-
-function RelatedProducts({ products }: { products: ProductDB[] }) {
-    return (
-        <section className="relative z-10 py-16 mt-8 border-t border-border/30 md:py-24 md:mt-12">
-            <div className="mx-auto max-w-7xl px-4 md:px-8">
-                <h2 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
-                    Vous aimerez <span className="text-gradient italic">aussi</span>
-                </h2>
-                <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-8 md:mt-12 lg:grid-cols-4">
-                    {products.map((p) => (
-                        <ProductCard
-                            key={p.id}
-                            product={{
-                                id: p.id,
-                                name: p.name,
-                                description: p.description,
-                                price: p.price,
-                                image: p.image,
-                                categoryId: p.category_id,
-                                categoryName: p.categories?.name ?? "",
-                                sku: "",
-                            }}
-                        />
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-}
-
-function MobileActionBar({ product }: { product: ProductDB }) {
-    const { addItem, setIsOpen } = useCart();
-    const [added, setAdded] = useState(false);
-    const whatsappLink = getWhatsAppLink({ name: product.name, price: product.price });
-
-    function handleAddToCart() {
-        addItem({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            image: product.image,
-        });
-        setAdded(true);
-        setTimeout(() => {
-            setAdded(false);
-            setIsOpen(true);
-        }, 450);
-    }
-
-    return (
-        <div className="fixed bottom-20 left-0 right-0 z-40 px-4 pb-2 sm:hidden">
-            <div className="glass mx-auto flex max-w-md items-center gap-3 rounded-2xl p-3 shadow-premium-lg">
-                <div className="min-w-0 flex-1 pl-2">
-                    <p className="truncate text-xs font-semibold text-muted-foreground">{product.name}</p>
-                    <p className="font-display text-base font-bold text-primary">
-                        {product.price.toLocaleString()} FCFA
-                    </p>
-                </div>
-                <button onClick={handleAddToCart} className="touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-background/60 text-primary" aria-label="Ajouter au panier">
-                    <AddToCartIcon added={added} />
-                </button>
-                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="touch-target flex h-11 shrink-0 items-center justify-center rounded-full bg-[#25d366] px-5 text-sm font-bold text-white shadow-md">
-                    Commander
-                </a>
-            </div>
         </div>
     );
 }
@@ -3691,257 +2803,6 @@ export default function App() {
 }
 </file>
 
-<file path="src/index.css">
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 258 25% 14%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 258 25% 14%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 258 25% 14%;
-
-    /* Violet premium */
-    --primary: 258 90% 66%;
-    --primary-foreground: 0 0% 100%;
-
-    /* Orange vibrant */
-    --secondary: 24 95% 53%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 258 30% 97%;
-    --muted-foreground: 258 10% 46%;
-
-    --accent: 258 40% 96%;
-    --accent-foreground: 258 25% 14%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 142 71% 35%;
-
-    --border: 258 20% 91%;
-    --input: 258 20% 91%;
-    --ring: 258 90% 66%;
-
-    --radius: 1rem;
-  }
-
-  .dark {
-    --background: 258 30% 7%;
-    --foreground: 258 20% 96%;
-    --card: 258 25% 10%;
-    --card-foreground: 258 20% 96%;
-    --popover: 258 25% 10%;
-    --popover-foreground: 258 20% 96%;
-    --primary: 258 90% 70%;
-    --primary-foreground: 258 30% 7%;
-    --secondary: 24 95% 58%;
-    --secondary-foreground: 258 30% 7%;
-    --muted: 258 20% 16%;
-    --muted-foreground: 258 10% 65%;
-    --accent: 258 20% 16%;
-    --accent-foreground: 258 20% 96%;
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 258 20% 18%;
-    --input: 258 20% 18%;
-    --ring: 258 90% 70%;
-  }
-
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: background-color 300ms ease, color 300ms ease;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  ::selection {
-    background-color: hsl(var(--primary) / 0.25);
-  }
-
-  /* Respecte les preferences systeme "reduire les animations" :
-     tres utile sur les Android bas de gamme ou en mode economie de batterie */
-  @media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-}
-
-@layer utilities {
-  .font-display {
-    font-family: 'Fraunces', serif;
-  }
-
-  .text-gradient {
-    background-image: linear-gradient(120deg, hsl(var(--primary)), hsl(var(--secondary)));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Effet verre "lourd" : reserve aux elements uniques a l'ecran
-     (header sticky, tiroir panier, modales) pour ne pas cumuler
-     plusieurs backdrop-filter couteux en meme temps sur Android. */
-  .glass {
-    background: hsl(0 0% 100% / 0.55);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid hsl(0 0% 100% / 0.4);
-  }
-
-  .glass-dark {
-    background: hsl(258 30% 10% / 0.45);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid hsl(0 0% 100% / 0.12);
-  }
-
-  /* Version allegee pour les elements qui se repetent (chips, badges,
-     petites cartes) : flou reduit, moins couteux quand il y en a plusieurs
-     a l'ecran en meme temps. */
-  .glass-light {
-    background: hsl(0 0% 100% / 0.65);
-    backdrop-filter: blur(8px) saturate(140%);
-    -webkit-backdrop-filter: blur(8px) saturate(140%);
-    border: 1px solid hsl(0 0% 100% / 0.4);
-  }
-
-  .glow-primary {
-    box-shadow: 0 8px 40px -8px hsl(var(--primary) / 0.55);
-  }
-
-  .glow-secondary {
-    box-shadow: 0 8px 40px -8px hsl(var(--secondary) / 0.55);
-  }
-
-  .blob {
-    position: absolute;
-    border-radius: 9999px;
-    filter: blur(60px);
-    opacity: 0.55;
-    animation: blob-float 14s ease-in-out infinite;
-    pointer-events: none;
-    /* Evite de repeindre inutilement le reste de la page sur les GPU faibles */
-    will-change: transform;
-  }
-
-  /* --- Identite SmartMarket --- */
-
-  .tilt-card {
-    transform-style: preserve-3d;
-    transition: transform 0.15s ease-out, box-shadow 0.35s ease;
-  }
-
-  .shimmer-bg {
-    background: linear-gradient(90deg,
-        hsl(var(--muted)) 25%,
-        hsl(var(--muted-foreground) / 0.15) 37%,
-        hsl(var(--muted)) 63%);
-    background-size: 400% 100%;
-    animation: shimmer 2.5s ease-in-out infinite;
-  }
-
-  .magnetic-btn {
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
-  }
-
-  .magnetic-btn:hover {
-    transform: translateY(-2px) scale(1.03);
-  }
-
-  .magnetic-btn:active {
-    transform: translateY(0) scale(0.97);
-  }
-
-  .grain-overlay {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* Zone tactile minimale confortable (44px) pour les boutons denses
-     sur mobile, meme quand le contenu visuel est plus petit. */
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
-
-@keyframes blob-float {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  33% {
-    transform: translate(30px, -40px) scale(1.1);
-  }
-
-  66% {
-    transform: translate(-25px, 25px) scale(0.95);
-  }
-}
-
-@keyframes gradient-move {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  100% {
-    background-position: 200% 50%;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-}
-</file>
-
 <file path="src/main.tsx">
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -3962,6 +2823,10 @@ createRoot(document.getElementById("root")!).render(
     </ErrorBoundary>
   </StrictMode>
 );
+</file>
+
+<file path="src/vite-env.d.ts">
+/// <reference types="vite/client" />
 </file>
 
 <file path=".oxlintrc.json">
@@ -4024,50 +2889,6 @@ createRoot(document.getElementById("root")!).render(
 </html>
 </file>
 
-<file path="package.json">
-{
-  "name": "judickshop-v2",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@fontsource-variable/geist": "^5.2.9",
-    "@supabase/supabase-js": "^2.110.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "framer-motion": "^12.42.2",
-    "lucide-react": "^1.22.0",
-    "radix-ui": "^1.6.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.1",
-    "shadcn": "^4.12.0",
-    "tailwind-merge": "^3.6.0",
-    "tw-animate-css": "^1.4.0",
-    "zustand": "^5.0.14"
-  },
-  "devDependencies": {
-    "@types/node": "^24.13.2",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.5.2",
-    "oxlint": "^1.69.0",
-    "postcss": "^8.5.16",
-    "tailwindcss": "^3.4.19",
-    "tailwindcss-animate": "^1.0.7",
-    "typescript": "~5.7.2",
-    "vite": "^5.4.11"
-  }
-}
-</file>
-
 <file path="postcss.config.js">
 export default {
     plugins: {
@@ -4110,161 +2931,6 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
-</file>
-
-<file path="tailwind.config.js">
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-    darkMode: ["class"],
-    content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-    theme: {
-        extend: {
-            colors: {
-                border: "hsl(var(--border))",
-                input: "hsl(var(--input))",
-                ring: "hsl(var(--ring))",
-                background: "hsl(var(--background))",
-                foreground: "hsl(var(--foreground))",
-                primary: {
-                    DEFAULT: "hsl(var(--primary))",
-                    foreground: "hsl(var(--primary-foreground))",
-                },
-                secondary: {
-                    DEFAULT: "hsl(var(--secondary))",
-                    foreground: "hsl(var(--secondary-foreground))",
-                },
-                destructive: {
-                    DEFAULT: "hsl(var(--destructive))",
-                    foreground: "hsl(var(--destructive-foreground))",
-                },
-                muted: {
-                    DEFAULT: "hsl(var(--muted))",
-                    foreground: "hsl(var(--muted-foreground))",
-                },
-                accent: {
-                    DEFAULT: "hsl(var(--accent))",
-                    foreground: "hsl(var(--accent-foreground))",
-                },
-                popover: {
-                    DEFAULT: "hsl(var(--popover))",
-                    foreground: "hsl(var(--popover-foreground))",
-                },
-                card: {
-                    DEFAULT: "hsl(var(--card))",
-                    foreground: "hsl(var(--card-foreground))",
-                },
-                success: "hsl(var(--success))",
-            },
-            borderRadius: {
-                xl: "calc(var(--radius) + 4px)",
-                lg: "var(--radius)",
-                md: "calc(var(--radius) - 2px)",
-                sm: "calc(var(--radius) - 4px)",
-            },
-            boxShadow: {
-                premium: "0 8px 30px -8px rgba(0,0,0,0.12)",
-                "premium-lg": "0 20px 60px -12px rgba(0,0,0,0.18)",
-                "premium-xl": "0 30px 90px -20px rgba(0,0,0,0.25)",
-                glass: "inset 0 1px 0 0 rgba(255,255,255,0.4)",
-            },
-            keyframes: {
-                "fade-up": {
-                    from: { opacity: "0", transform: "translateY(16px)" },
-                    to: { opacity: "1", transform: "translateY(0)" },
-                },
-                "accordion-down": {
-                    from: { height: "0" },
-                    to: { height: "var(--radix-accordion-content-height)" },
-                },
-                "accordion-up": {
-                    from: { height: "var(--radix-accordion-content-height)" },
-                    to: { height: "0" },
-                },
-                shimmer: {
-                    "0%": { backgroundPosition: "-200% 0" },
-                    "100%": { backgroundPosition: "200% 0" },
-                },
-                "pulse-glow": {
-                    "0%, 100%": { opacity: "0.55", transform: "scale(1)" },
-                    "50%": { opacity: "0.85", transform: "scale(1.05)" },
-                },
-                "float-soft": {
-                    "0%, 100%": { transform: "translateY(0px)" },
-                    "50%": { transform: "translateY(-8px)" },
-                },
-            },
-            animation: {
-                "fade-up": "fade-up 0.6s ease-out forwards",
-                "accordion-down": "accordion-down 0.2s ease-out",
-                "accordion-up": "accordion-up 0.2s ease-out",
-                shimmer: "shimmer 2.5s linear infinite",
-                "pulse-glow": "pulse-glow 3s ease-in-out infinite",
-                "float-soft": "float-soft 4s ease-in-out infinite",
-            },
-        },
-    },
-    plugins: [require("tailwindcss-animate")],
-};
-</file>
-
-<file path="tsconfig.app.json">
-{
-  "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "es2023",
-    "lib": [
-      "ES2023",
-      "DOM"
-    ],
-    "module": "esnext",
-    "types": [
-      "vite/client"
-    ],
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": [
-    "src"
-  ]
-}
-</file>
-
-<file path="tsconfig.json">
-{
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ],
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
-  }
-}
 </file>
 
 <file path="tsconfig.node.json">
@@ -4883,6 +3549,160 @@ export default function ProductFormDialog({
 }
 </file>
 
+<file path="src/components/layout/Header.tsx">
+import { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { Menu, Search, ShoppingBag, X, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/stores/useCart";
+import { useSiteSettings } from "@/hooks/useSupabase";
+import SearchDialog from "@/components/SearchDialog";
+
+const navLinks = [
+    { label: "Accueil", path: "/" },
+    { label: "Catalogue", path: "/catalogue" },
+    { label: "Blog", path: "/blog" },
+];
+
+export default function Header() {
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const { totalItems, setIsOpen } = useCart();
+    const cartCount = totalItems();
+    const { settings } = useSiteSettings();
+
+    return (
+        <header className="sticky top-0 z-50 w-full glass shadow-sm">
+            <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-8">
+                <Link to="/" className="flex items-center gap-2">
+                    {settings?.logo_url ? (
+                        <img
+                            src={settings.logo_url}
+                            alt="Logo"
+                            className="h-12 w-auto object-contain"
+                        />
+                    ) : (
+                        <div className="flex flex-col leading-none">
+                            <span className="font-display text-2xl font-semibold tracking-tight text-foreground">
+                                JA <Sparkles className="inline h-4 w-4 text-secondary -mt-2" />
+                            </span>
+                            <span className="font-display text-xs italic text-primary">
+                                Jí Yoū
+                            </span>
+                        </div>
+                    )}
+                </Link>
+
+                <nav className="hidden items-center gap-1 rounded-full glass px-2 py-1.5 md:flex">
+                    {navLinks.map((link) => (
+                        <NavLink
+                            key={link.path}
+                            to={link.path}
+                            className={({ isActive }) =>
+                                `relative rounded-full px-4 py-2 text-sm font-semibold transition-colors ${isActive
+                                    ? "text-white"
+                                    : "text-foreground/70 hover:text-foreground"
+                                }`
+                            }
+                        >
+                            {({ isActive }) => (
+                                <>
+                                    {isActive && (
+                                        <motion.span
+                                            layoutId="nav-pill"
+                                            className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-primary to-secondary shadow-md"
+                                            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                                        />
+                                    )}
+                                    {link.label}
+                                </>
+                            )}
+                        </NavLink>
+                    ))}
+                </nav>
+
+                <div className="flex items-center gap-2">
+                    <motion.button
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.92 }}
+                        className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-primary/10"
+                        onClick={() => setSearchOpen(true)}
+                    >
+                        <Search className="h-5 w-5" />
+                    </motion.button>
+
+                    <motion.button
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.92 }}
+                        className="relative flex h-11 w-11 items-center justify-center rounded-full hover:bg-primary/10"
+                        onClick={() => setIsOpen(true)}
+                    >
+                        <ShoppingBag className="h-5 w-5" />
+                        <AnimatePresence>
+                            {cartCount > 0 && (
+                                <motion.div
+                                    key={cartCount}
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    exit={{ scale: 0 }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                                    className="absolute -right-1 -top-1"
+                                >
+                                    <Badge className="h-5 w-5 justify-center rounded-full bg-gradient-to-r from-primary to-secondary p-0 text-[11px] text-white shadow-sm">
+                                        {cartCount}
+                                    </Badge>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.button>
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-primary/10 md:hidden"
+                        onClick={() => setMobileOpen((o) => !o)}
+                    >
+                        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                    </Button>
+                </div>
+            </div>
+
+            <AnimatePresence>
+                {mobileOpen && (
+                    <motion.nav
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="flex flex-col gap-1 overflow-hidden border-t border-white/30 glass px-4 py-4 md:hidden"
+                    >
+                        {navLinks.map((link) => (
+                            <NavLink
+                                key={link.path}
+                                to={link.path}
+                                onClick={() => setMobileOpen(false)}
+                                className={({ isActive }) =>
+                                    `rounded-xl px-3 py-3 text-sm font-semibold ${isActive
+                                        ? "bg-gradient-to-r from-primary to-secondary text-white"
+                                        : "text-foreground/80 hover:bg-primary/10"
+                                    }`
+                                }
+                            >
+                                {link.label}
+                            </NavLink>
+                        ))}
+                    </motion.nav>
+                )}
+            </AnimatePresence>
+
+            <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+        </header>
+    );
+}
+</file>
+
 <file path="src/components/ui/button.tsx">
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -5358,6 +4178,311 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
 }
 
 export { Textarea }
+</file>
+
+<file path="src/components/CartDrawer.tsx">
+import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { useCart } from "@/stores/useCart";
+import { getCartWhatsAppLink } from "@/lib/whatsapp";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function CartDrawer() {
+    const {
+        items,
+        isOpen,
+        setIsOpen,
+        removeItem,
+        updateQuantity,
+        totalPrice,
+        clearCart,
+    } = useCart();
+
+    const whatsappLink = getCartWhatsAppLink(
+        items.map((i) => ({
+            name: i.name,
+            quantity: i.quantity,
+            price: i.price,
+        }))
+    );
+
+    const isEmpty = items.length === 0;
+    const total = totalPrice();
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <>
+                    {/* Overlay de fond */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+                        onClick={() => setIsOpen(false)}
+                    />
+
+                    {/* Panier latéral */}
+                    <motion.div
+                        initial={{ x: "100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", damping: 26, stiffness: 220 }}
+                        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-background shadow-premium-xl border-l border-border/50"
+                    >
+                        {/* En-tête */}
+                        <div className="flex items-center justify-between border-b border-border/50 px-6 py-5">
+                            <h2 className="font-display text-xl font-semibold text-foreground">
+                                Votre panier
+                            </h2>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="magnetic-btn rounded-full p-2 text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        {/* Contenu principal */}
+                        <div className="flex-1 overflow-y-auto px-6 py-4">
+                            {isEmpty ? (
+                                <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+                                    <div className="rounded-full bg-muted p-6 animate-float-soft">
+                                        <ShoppingBag className="h-10 w-10 text-muted-foreground/50" />
+                                    </div>
+                                    <p className="text-sm text-muted-foreground font-medium">
+                                        Votre panier est tristement vide
+                                    </p>
+                                </div>
+                            ) : (
+                                <ul className="flex flex-col gap-6">
+                                    {items.map((item) => (
+                                        <CartLine
+                                            key={item.id}
+                                            id={item.id}
+                                            name={item.name}
+                                            image={item.image}
+                                            price={item.price}
+                                            quantity={item.quantity}
+                                            onRemove={removeItem}
+                                            onUpdateQuantity={updateQuantity}
+                                        />
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
+                        {/* Pied de page (si panier non vide) */}
+                        {!isEmpty && (
+                            <div className="border-t border-border/50 bg-muted/20 px-6 py-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                                        Total estimé
+                                    </span>
+                                    <span className="font-display text-2xl font-bold text-foreground">
+                                        {total.toLocaleString()} FCFA
+                                    </span>
+                                </div>
+
+                                {/* Correction apportée ici : Réintégration de la balise ouvrante <a> */}
+                                <a
+                                    href={whatsappLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="magnetic-btn flex w-full items-center justify-center gap-2 rounded-xl bg-[#25d366] py-4 text-sm font-bold text-white shadow-lg hover:shadow-xl"
+                                >
+                                    Commander via WhatsApp
+                                </a>
+
+                                <button
+                                    onClick={clearCart}
+                                    className="mt-4 w-full py-2 text-xs font-semibold text-muted-foreground hover:text-destructive transition-colors"
+                                >
+                                    Vider le panier
+                                </button>
+                            </div>
+                        )}
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+    );
+}
+
+interface CartLineProps {
+    id: number;
+    name: string;
+    image: string;
+    price: number;
+    quantity: number;
+    onRemove: (id: number) => void;
+    onUpdateQuantity: (id: number, quantity: number) => void;
+}
+
+function CartLine({ id, name, image, price, quantity, onRemove, onUpdateQuantity }: CartLineProps) {
+    const lineTotal = price * quantity;
+
+    return (
+        <li className="flex gap-4 group">
+            <div className="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-muted/50 border border-border/40">
+                <img
+                    src={image}
+                    alt={name}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+            </div>
+
+            <div className="flex flex-1 flex-col justify-center py-1">
+                <div className="flex items-start justify-between gap-2">
+                    <p className="font-display text-base font-semibold text-foreground">
+                        {name}
+                    </p>
+                    <button
+                        onClick={() => onRemove(id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </button>
+                </div>
+
+                <p className="font-display text-sm text-primary mb-3">
+                    {lineTotal.toLocaleString()} FCFA
+                </p>
+
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => onUpdateQuantity(id, quantity - 1)}
+                        className="magnetic-btn flex h-8 w-8 items-center justify-center rounded-full border border-border hover:bg-foreground/5"
+                    >
+                        <Minus className="h-3 w-3" />
+                    </button>
+                    <span className="w-4 text-center text-sm font-medium">
+                        {quantity}
+                    </span>
+                    <button
+                        onClick={() => onUpdateQuantity(id, quantity + 1)}
+                        className="magnetic-btn flex h-8 w-8 items-center justify-center rounded-full border border-border hover:bg-foreground/5"
+                    >
+                        <Plus className="h-3 w-3" />
+                    </button>
+                </div>
+            </div>
+        </li>
+    );
+}
+</file>
+
+<file path="src/components/ProductCard.tsx">
+import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ShoppingBag, Check } from "lucide-react";
+import type { Product } from "@/data/mock";
+import { useCart } from "@/stores/useCart";
+import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
+
+export default function ProductCard({ product }: { product: Product }) {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const [tilt, setTilt] = useState({ x: 0, y: 0 });
+    const [added, setAdded] = useState(false);
+    const { addItem, setIsOpen } = useCart();
+    const isTouch = useIsTouchDevice();
+
+    // Le tilt 3D au survol n'a de sens qu'avec une souris : sur mobile on le
+    // desactive completement pour eviter tout calcul inutile a chaque frame.
+    function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+        if (isTouch) return;
+        const card = cardRef.current;
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
+        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        setTilt({ x: py * -8, y: px * 10 });
+    }
+
+    function handleMouseLeave() {
+        if (isTouch) return;
+        setTilt({ x: 0, y: 0 });
+    }
+
+    function handleQuickAdd(e: React.MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        addItem({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+        });
+        setAdded(true);
+        setTimeout(() => {
+            setAdded(false);
+            setIsOpen(true);
+        }, 500);
+    }
+
+    return (
+        <Link to={`/produit/${product.id}`} className="group block">
+            <div
+                ref={cardRef}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className="tilt-card overflow-hidden rounded-2xl bg-card border border-border/40 shadow-sm transition-shadow duration-300 active:shadow-premium sm:hover:shadow-premium-lg"
+                style={
+                    isTouch
+                        ? undefined
+                        : { transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }
+                }
+            >
+                <div className="aspect-[4/5] overflow-hidden bg-muted/30 relative">
+                    <img
+                        src={product.image}
+                        alt={product.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover transition-transform duration-700 ease-out sm:group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 sm:group-hover:opacity-100" />
+
+                    {/* Sur tactile, il n'y a pas de "survol" : le bouton reste visible en permanence
+                        pour que l'ajout rapide au panier soit toujours accessible d'un tap. */}
+                    <motion.button
+                        onClick={handleQuickAdd}
+                        whileTap={{ scale: 0.9 }}
+                        className={
+                            "touch-target absolute bottom-3 right-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-foreground shadow-md transition-all duration-300 sm:h-10 sm:w-10 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:hover:bg-white " +
+                            (isTouch ? "opacity-100 translate-y-0" : "")
+                        }
+                        aria-label="Ajouter au panier"
+                    >
+                        {added ? (
+                            <Check className="h-4 w-4 text-success" />
+                        ) : (
+                            <ShoppingBag className="h-4 w-4" />
+                        )}
+                    </motion.button>
+                </div>
+
+                <div
+                    className="p-5 flex flex-col gap-1"
+                    style={isTouch ? undefined : { transform: "translateZ(20px)" }}
+                >
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                        {product.categoryName}
+                    </span>
+                    <h3 className="font-display text-lg text-foreground sm:group-hover:text-primary transition-colors">
+                        {product.name}
+                    </h3>
+                    <p className="font-display text-xl text-primary font-medium mt-1">
+                        {product.price.toLocaleString()} FCFA
+                    </p>
+                </div>
+            </div>
+        </Link>
+    );
+}
 </file>
 
 <file path="src/pages/AdminDashboard.tsx">
@@ -6301,6 +5426,841 @@ function ThemeTab() {
 }
 </file>
 
+<file path="src/pages/Catalogue.tsx">
+import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { PackageX, SlidersHorizontal } from "lucide-react";
+import { useCategories, useProducts } from "@/hooks/useSupabase";
+import { motion, AnimatePresence } from "framer-motion";
+import ProductCard from "@/components/ProductCard";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
+export default function Catalogue() {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeSlug = searchParams.get("category") ?? undefined;
+    const [sort, setSort] = useState<"recent" | "price_asc" | "price_desc">("recent");
+
+    const { categories } = useCategories();
+    const { products, loading } = useProducts(activeSlug);
+
+    const sortedProducts = useMemo(() => {
+        return [...products].sort((a, b) => {
+            if (sort === "price_asc") return a.price - b.price;
+            if (sort === "price_desc") return b.price - a.price;
+            return b.id - a.id;
+        });
+    }, [products, sort]);
+
+    function handleCategoryClick(slug?: string) {
+        if (slug) {
+            setSearchParams({ category: slug });
+        } else {
+            setSearchParams({});
+        }
+    }
+
+    return (
+        <div className="relative min-h-screen overflow-hidden bg-background pb-24">
+            <div className="blob -right-40 top-0 h-96 w-96 bg-primary/70" />
+            <div className="blob -left-32 top-64 h-72 w-72 bg-secondary/60" style={{ animationDelay: "4s" }} />
+
+            <section className="relative py-14 md:py-24 border-b border-border/30">
+                <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="relative z-10 mx-auto max-w-7xl px-4 text-center md:px-8"
+                >
+                    <span className="glass-light inline-block rounded-full px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                        La collection complete
+                    </span>
+                    <h1 className="font-display mt-6 text-3xl font-semibold text-foreground sm:text-4xl md:text-6xl">
+                        Notre <span className="text-gradient italic">catalogue</span>
+                    </h1>
+                    <p className="mt-4 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                        {sortedProducts.length} article{sortedProducts.length > 1 ? "s" : ""}
+                    </p>
+                </motion.div>
+            </section>
+
+            {/* Barre de filtres : sticky sur mobile pour rester accessible pendant le
+                scroll, sans reposer sur un backdrop-filter lourd empile en continu. */}
+            <section className="sticky top-20 z-30 -mx-4 border-b border-border/30 bg-background/95 px-4 py-4 backdrop-blur-sm md:static md:mx-0 md:border-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+                <div className="mx-auto max-w-7xl md:px-8">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1 md:flex-wrap md:gap-3 md:pb-0">
+                            <button
+                                onClick={() => handleCategoryClick(undefined)}
+                                className={
+                                    "touch-target shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition-colors duration-200 " +
+                                    (!activeSlug
+                                        ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
+                                        : "glass-light text-foreground")
+                                }
+                            >
+                                Tous
+                            </button>
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => handleCategoryClick(cat.slug)}
+                                    className={
+                                        "touch-target shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition-colors duration-200 " +
+                                        (activeSlug === cat.slug
+                                            ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
+                                            : "glass-light text-foreground")
+                                    }
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="flex items-center gap-2 glass-light rounded-2xl p-1.5 self-start md:self-auto">
+                            <div className="pl-3 text-primary shrink-0">
+                                <SlidersHorizontal className="h-4 w-4" />
+                            </div>
+                            <Select value={sort} onValueChange={(value) => setSort(value as typeof sort)}>
+                                <SelectTrigger className="w-[170px] border-none bg-transparent shadow-none font-medium">
+                                    <SelectValue placeholder="Trier par" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl shadow-premium">
+                                    <SelectItem value="recent">Plus recents</SelectItem>
+                                    <SelectItem value="price_asc">Prix croissant</SelectItem>
+                                    <SelectItem value="price_desc">Prix decroissant</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:px-8">
+                {loading ? (
+                    <div className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-4">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <div key={i}>
+                                <div className="aspect-[4/5] rounded-2xl shimmer-bg" />
+                                <div className="mt-4 h-4 w-3/4 rounded shimmer-bg" />
+                                <div className="mt-2 h-4 w-1/2 rounded shimmer-bg" />
+                            </div>
+                        ))}
+                    </div>
+                ) : sortedProducts.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center gap-4 py-32">
+                        <div className="glass-light rounded-full p-6">
+                            <PackageX className="h-10 w-10 text-primary/60" />
+                        </div>
+                        <p className="text-base font-medium text-muted-foreground text-center px-4">
+                            Aucun produit trouve dans cette categorie.
+                        </p>
+                    </div>
+                ) : (
+                    // Pas d'animation "layout" FLIP sur chaque carte ici : avec beaucoup
+                    // d'articles, ce recalcul de mise en page peut saccader sur un GPU
+                    // Android d'entree de gamme. On garde uniquement un fondu simple,
+                    // peu couteux et deja tres agreable a l'oeil.
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeSlug ?? "all"}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                            className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-4"
+                        >
+                            {sortedProducts.map((product) => (
+                                <ProductCard
+                                    key={product.id}
+                                    product={{
+                                        id: product.id,
+                                        name: product.name,
+                                        description: product.description,
+                                        price: product.price,
+                                        image: product.image,
+                                        categoryId: product.category_id,
+                                        categoryName: product.categories?.name ?? "",
+                                        sku: "",
+                                    }}
+                                />
+                            ))}
+                        </motion.div>
+                    </AnimatePresence>
+                )}
+            </section>
+        </div>
+    );
+}
+</file>
+
+<file path="src/pages/ProductDetail.tsx">
+import { Link, useParams } from "react-router-dom";
+import { ShieldCheck, ShoppingBag, Truck, ChevronLeft, Sparkles, Check } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import ProductCard from "@/components/ProductCard";
+import { useCart } from "@/stores/useCart";
+import { useProduct, useProducts } from "@/hooks/useSupabase";
+import { getWhatsAppLink } from "@/lib/whatsapp";
+import type { ProductDB } from "@/lib/supabase";
+
+export default function ProductDetail() {
+    const { id } = useParams<{ id: string }>();
+    const { product, loading } = useProduct(Number(id));
+    const { products: allProducts } = useProducts();
+
+    if (loading) {
+        return <ProductSkeleton />;
+    }
+
+    if (!product) {
+        return <ProductNotFound />;
+    }
+
+    const relatedProducts = allProducts
+        .filter((p) => p.category_id === product.category_id && p.id !== product.id)
+        .slice(0, 4);
+
+    return (
+        <div className="relative min-h-screen overflow-hidden bg-background pb-32 md:pb-20">
+            <div className="blob -right-32 top-0 h-96 w-96 bg-primary/50 hidden sm:block" />
+            <div className="blob left-0 top-96 h-72 w-72 bg-secondary/40 hidden sm:block" />
+
+            <BackLink />
+
+            <section className="relative z-10 mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8 lg:py-12">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-20 items-center">
+                    <ProductImage src={product.image} alt={product.name} />
+                    <ProductInfo product={product} />
+                </div>
+            </section>
+
+            {relatedProducts.length > 0 && (
+                <RelatedProducts products={relatedProducts} />
+            )}
+
+            <MobileActionBar product={product} />
+        </div>
+    );
+}
+
+function ProductSkeleton() {
+    return (
+        <div className="mx-auto max-w-7xl px-4 py-8 md:py-12 md:px-8">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+                <div className="aspect-[4/5] rounded-[2rem] shimmer-bg" />
+                <div className="flex flex-col gap-4 pt-4 md:pt-8">
+                    <div className="h-4 w-1/4 rounded shimmer-bg" />
+                    <div className="h-10 w-3/4 rounded shimmer-bg" />
+                    <div className="h-8 w-1/3 rounded shimmer-bg" />
+                    <div className="h-24 w-full rounded shimmer-bg" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ProductNotFound() {
+    return (
+        <div className="mx-auto flex min-h-[60vh] max-w-7xl flex-col items-center justify-center px-4 text-center">
+            <p className="font-display text-3xl font-bold text-foreground">
+                Produit introuvable
+            </p>
+            <Link to="/catalogue" className="mt-6 flex items-center gap-2 text-sm font-semibold text-primary hover:text-secondary transition-colors">
+                <ChevronLeft className="h-4 w-4" />
+                Retour au catalogue
+            </Link>
+        </div>
+    );
+}
+
+function BackLink() {
+    return (
+        <div className="relative z-10 mx-auto max-w-7xl px-4 pt-6 md:pt-8 md:px-8">
+            <Link to="/catalogue" className="touch-target inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors -ml-2">
+                <ChevronLeft className="h-4 w-4" />
+                Retour
+            </Link>
+        </div>
+    );
+}
+
+function ProductImage({ src, alt }: { src: string; alt: string }) {
+    return (
+        <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-muted/30 shadow-sm animate-fade-up">
+            <img src={src} alt={alt} loading="eager" decoding="async" className="h-full w-full object-cover" />
+        </div>
+    );
+}
+
+function ProductInfo({ product }: { product: ProductDB }) {
+    const { addItem, setIsOpen } = useCart();
+    const [added, setAdded] = useState(false);
+
+    function handleAddToCart() {
+        addItem({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+        });
+        setAdded(true);
+        setTimeout(() => {
+            setAdded(false);
+            setIsOpen(true);
+        }, 450);
+    }
+
+    const cartLabel = added ? "Ajoute !" : "Ajouter au panier";
+    const categoryName = product.categories?.name ?? "";
+
+    return (
+        <div className="flex flex-col justify-center">
+            <span className="glass-light inline-flex w-fit items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                <Sparkles className="h-3 w-3" />
+                {categoryName}
+            </span>
+
+            <h1 className="font-display mt-4 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
+                {product.name}
+            </h1>
+
+            <p className="font-display text-gradient mt-5 text-2xl font-semibold sm:text-3xl">
+                {product.price.toLocaleString()} FCFA
+            </p>
+
+            <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">
+                {product.description}
+            </p>
+
+            <div className="mt-8 hidden flex-col gap-4 sm:flex sm:flex-row">
+                <WhatsAppButton
+                    product={{ name: product.name, price: product.price }}
+                    className="flex-1 rounded-full py-4 text-base"
+                />
+                <Button
+                    variant="outline"
+                    size="lg"
+                    className="flex-1 gap-2 rounded-full py-4 text-base glass-light border-primary/30 hover:bg-primary/10"
+                    onClick={handleAddToCart}
+                >
+                    <AddToCartIcon added={added} />
+                    {cartLabel}
+                </Button>
+            </div>
+
+            <TrustBox />
+        </div>
+    );
+}
+
+function AddToCartIcon({ added }: { added: boolean }) {
+    if (added) {
+        return <Check className="h-5 w-5 text-success" />;
+    }
+    return <ShoppingBag className="h-5 w-5" />;
+}
+
+function TrustBox() {
+    return (
+        <div className="mt-10 flex flex-col gap-4 rounded-3xl glass-light p-5 md:p-6">
+            <div className="flex items-center gap-4 text-sm font-medium text-foreground/80">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white">
+                    <Truck className="h-5 w-5" />
+                </div>
+                Livraison rapide disponible
+            </div>
+            <div className="flex items-center gap-4 text-sm font-medium text-foreground/80">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white">
+                    <ShieldCheck className="h-5 w-5" />
+                </div>
+                Paiement securise a la livraison
+            </div>
+        </div>
+    );
+}
+
+function RelatedProducts({ products }: { products: ProductDB[] }) {
+    return (
+        <section className="relative z-10 py-16 mt-8 border-t border-border/30 md:py-24 md:mt-12">
+            <div className="mx-auto max-w-7xl px-4 md:px-8">
+                <h2 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
+                    Vous aimerez <span className="text-gradient italic">aussi</span>
+                </h2>
+                <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-8 md:mt-12 lg:grid-cols-4">
+                    {products.map((p) => (
+                        <ProductCard
+                            key={p.id}
+                            product={{
+                                id: p.id,
+                                name: p.name,
+                                description: p.description,
+                                price: p.price,
+                                image: p.image,
+                                categoryId: p.category_id,
+                                categoryName: p.categories?.name ?? "",
+                                sku: "",
+                            }}
+                        />
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function MobileActionBar({ product }: { product: ProductDB }) {
+    const { addItem, setIsOpen } = useCart();
+    const [added, setAdded] = useState(false);
+    const whatsappLink = getWhatsAppLink({ name: product.name, price: product.price });
+
+    function handleAddToCart() {
+        addItem({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+        });
+        setAdded(true);
+        setTimeout(() => {
+            setAdded(false);
+            setIsOpen(true);
+        }, 450);
+    }
+
+    return (
+        <div className="fixed bottom-20 left-0 right-0 z-40 px-4 pb-2 sm:hidden">
+            <div className="glass mx-auto flex max-w-md items-center gap-3 rounded-2xl p-3 shadow-premium-lg">
+                <div className="min-w-0 flex-1 pl-2">
+                    <p className="truncate text-xs font-semibold text-muted-foreground">{product.name}</p>
+                    <p className="font-display text-base font-bold text-primary">
+                        {product.price.toLocaleString()} FCFA
+                    </p>
+                </div>
+                <button onClick={handleAddToCart} className="touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-background/60 text-primary" aria-label="Ajouter au panier">
+                    <AddToCartIcon added={added} />
+                </button>
+                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="touch-target flex h-11 shrink-0 items-center justify-center rounded-full bg-[#25d366] px-5 text-sm font-bold text-white shadow-md">
+                    Commander
+                </a>
+            </div>
+        </div>
+    );
+}
+</file>
+
+<file path="src/index.css">
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 258 25% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 258 25% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 258 25% 14%;
+
+    /* Violet premium */
+    --primary: 258 90% 66%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Orange vibrant */
+    --secondary: 24 95% 53%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 258 30% 97%;
+    --muted-foreground: 258 10% 46%;
+
+    --accent: 258 40% 96%;
+    --accent-foreground: 258 25% 14%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 71% 35%;
+
+    --border: 258 20% 91%;
+    --input: 258 20% 91%;
+    --ring: 258 90% 66%;
+
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 258 30% 7%;
+    --foreground: 258 20% 96%;
+    --card: 258 25% 10%;
+    --card-foreground: 258 20% 96%;
+    --popover: 258 25% 10%;
+    --popover-foreground: 258 20% 96%;
+    --primary: 258 90% 70%;
+    --primary-foreground: 258 30% 7%;
+    --secondary: 24 95% 58%;
+    --secondary-foreground: 258 30% 7%;
+    --muted: 258 20% 16%;
+    --muted-foreground: 258 10% 65%;
+    --accent: 258 20% 16%;
+    --accent-foreground: 258 20% 96%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 258 20% 18%;
+    --input: 258 20% 18%;
+    --ring: 258 90% 70%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 300ms ease, color 300ms ease;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.25);
+  }
+
+  /* Respecte les preferences systeme "reduire les animations" :
+     tres utile sur les Android bas de gamme ou en mode economie de batterie */
+  @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Fraunces', serif;
+  }
+
+  .text-gradient {
+    background-image: linear-gradient(120deg, hsl(var(--primary)), hsl(var(--secondary)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Effet verre "lourd" : reserve aux elements uniques a l'ecran
+     (header sticky, tiroir panier, modales) pour ne pas cumuler
+     plusieurs backdrop-filter couteux en meme temps sur Android. */
+  .glass {
+    background: hsl(0 0% 100% / 0.55);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid hsl(0 0% 100% / 0.4);
+  }
+
+  .glass-dark {
+    background: hsl(258 30% 10% / 0.45);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid hsl(0 0% 100% / 0.12);
+  }
+
+  /* Version allegee pour les elements qui se repetent (chips, badges,
+     petites cartes) : flou reduit, moins couteux quand il y en a plusieurs
+     a l'ecran en meme temps. */
+  .glass-light {
+    background: hsl(0 0% 100% / 0.65);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    border: 1px solid hsl(0 0% 100% / 0.4);
+  }
+
+  .glow-primary {
+    box-shadow: 0 8px 40px -8px hsl(var(--primary) / 0.55);
+  }
+
+  .glow-secondary {
+    box-shadow: 0 8px 40px -8px hsl(var(--secondary) / 0.55);
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(60px);
+    opacity: 0.55;
+    animation: blob-float 14s ease-in-out infinite;
+    pointer-events: none;
+    /* Evite de repeindre inutilement le reste de la page sur les GPU faibles */
+    will-change: transform;
+  }
+
+  /* --- Identite SmartMarket --- */
+
+  .tilt-card {
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out, box-shadow 0.35s ease;
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(90deg,
+        hsl(var(--muted)) 25%,
+        hsl(var(--muted-foreground) / 0.15) 37%,
+        hsl(var(--muted)) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+
+  .magnetic-btn {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  }
+
+  .magnetic-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+  }
+
+  .magnetic-btn:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  .grain-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Zone tactile minimale confortable (44px) pour les boutons denses
+     sur mobile, meme quand le contenu visuel est plus petit. */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@keyframes blob-float {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -40px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-25px, 25px) scale(0.95);
+  }
+}
+
+@keyframes gradient-move {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+</file>
+
+<file path="tailwind.config.js">
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+    darkMode: ["class"],
+    content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+    theme: {
+        extend: {
+            colors: {
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
+                primary: {
+                    DEFAULT: "hsl(var(--primary))",
+                    foreground: "hsl(var(--primary-foreground))",
+                },
+                secondary: {
+                    DEFAULT: "hsl(var(--secondary))",
+                    foreground: "hsl(var(--secondary-foreground))",
+                },
+                destructive: {
+                    DEFAULT: "hsl(var(--destructive))",
+                    foreground: "hsl(var(--destructive-foreground))",
+                },
+                muted: {
+                    DEFAULT: "hsl(var(--muted))",
+                    foreground: "hsl(var(--muted-foreground))",
+                },
+                accent: {
+                    DEFAULT: "hsl(var(--accent))",
+                    foreground: "hsl(var(--accent-foreground))",
+                },
+                popover: {
+                    DEFAULT: "hsl(var(--popover))",
+                    foreground: "hsl(var(--popover-foreground))",
+                },
+                card: {
+                    DEFAULT: "hsl(var(--card))",
+                    foreground: "hsl(var(--card-foreground))",
+                },
+                success: "hsl(var(--success))",
+            },
+            borderRadius: {
+                xl: "calc(var(--radius) + 4px)",
+                lg: "var(--radius)",
+                md: "calc(var(--radius) - 2px)",
+                sm: "calc(var(--radius) - 4px)",
+            },
+            boxShadow: {
+                premium: "0 8px 30px -8px rgba(0,0,0,0.12)",
+                "premium-lg": "0 20px 60px -12px rgba(0,0,0,0.18)",
+                "premium-xl": "0 30px 90px -20px rgba(0,0,0,0.25)",
+                glass: "inset 0 1px 0 0 rgba(255,255,255,0.4)",
+            },
+            keyframes: {
+                "fade-up": {
+                    from: { opacity: "0", transform: "translateY(16px)" },
+                    to: { opacity: "1", transform: "translateY(0)" },
+                },
+                "accordion-down": {
+                    from: { height: "0" },
+                    to: { height: "var(--radix-accordion-content-height)" },
+                },
+                "accordion-up": {
+                    from: { height: "var(--radix-accordion-content-height)" },
+                    to: { height: "0" },
+                },
+                shimmer: {
+                    "0%": { backgroundPosition: "-200% 0" },
+                    "100%": { backgroundPosition: "200% 0" },
+                },
+                "pulse-glow": {
+                    "0%, 100%": { opacity: "0.55", transform: "scale(1)" },
+                    "50%": { opacity: "0.85", transform: "scale(1.05)" },
+                },
+                "float-soft": {
+                    "0%, 100%": { transform: "translateY(0px)" },
+                    "50%": { transform: "translateY(-8px)" },
+                },
+            },
+            animation: {
+                "fade-up": "fade-up 0.6s ease-out forwards",
+                "accordion-down": "accordion-down 0.2s ease-out",
+                "accordion-up": "accordion-up 0.2s ease-out",
+                shimmer: "shimmer 2.5s linear infinite",
+                "pulse-glow": "pulse-glow 3s ease-in-out infinite",
+                "float-soft": "float-soft 4s ease-in-out infinite",
+            },
+        },
+    },
+    plugins: [require("tailwindcss-animate")],
+};
+</file>
+
+<file path="tsconfig.app.json">
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    /* Path Aliases (sans baseUrl) */
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ]
+}
+</file>
+
+<file path="tsconfig.json">
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  }
+}
+</file>
+
 <file path="src/pages/Home.tsx">
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
@@ -6579,6 +6539,50 @@ export const useAdmin = create<AdminState>()(
         }
     )
 );
+</file>
+
+<file path="package.json">
+{
+  "name": "judickshop-v2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "^5.2.9",
+    "@supabase/supabase-js": "^2.110.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^1.22.0",
+    "radix-ui": "^1.6.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1",
+    "shadcn": "^4.12.0",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.5.2",
+    "oxlint": "^1.69.0",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^3.4.19",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^7.0.2",
+    "vite": "^5.4.11"
+  }
+}
 </file>
 
 </files>

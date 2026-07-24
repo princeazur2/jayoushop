@@ -17,7 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, PackageCheck, PackageX } from "lucide-react";
 import { createProduct, updateProduct } from "@/hooks/useSupabase";
 import type { ProductDB, CategoryDB } from "@/lib/supabase";
 import { useToast } from "@/stores/useToast";
@@ -37,6 +37,7 @@ const emptyForm = {
     price: "",
     category_id: "",
     image: "",
+    in_stock: true,
 };
 
 export default function ProductFormDialog({
@@ -58,6 +59,7 @@ export default function ProductFormDialog({
                 price: String(product.price),
                 category_id: String(product.category_id),
                 image: product.image,
+                in_stock: product.in_stock !== false,
             });
         } else {
             setForm(emptyForm);
@@ -80,6 +82,7 @@ export default function ProductFormDialog({
             price: Number(form.price),
             category_id: Number(form.category_id),
             image: form.image,
+            in_stock: form.in_stock,
         };
 
         try {
@@ -163,6 +166,38 @@ export default function ProductFormDialog({
                                     ))}
                                 </SelectContent>
                             </Select>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <Label>Disponibilite</Label>
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setForm({ ...form, in_stock: true })}
+                                    className={
+                                        "flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-semibold transition-colors " +
+                                        (form.in_stock
+                                            ? "border-success bg-success/10 text-success"
+                                            : "border-border text-muted-foreground hover:border-success/40")
+                                    }
+                                >
+                                    <PackageCheck className="h-4 w-4" />
+                                    En stock
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setForm({ ...form, in_stock: false })}
+                                    className={
+                                        "flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-semibold transition-colors " +
+                                        (!form.in_stock
+                                            ? "border-destructive bg-destructive/10 text-destructive"
+                                            : "border-border text-muted-foreground hover:border-destructive/40")
+                                    }
+                                >
+                                    <PackageX className="h-4 w-4" />
+                                    Rupture de stock
+                                </button>
+                            </div>
                         </div>
 
                         <ImageUploadField

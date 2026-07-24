@@ -62,7 +62,7 @@ export default function Catalogue() {
 
             {/* Barre de filtres : sticky sur mobile pour rester accessible pendant le
                 scroll, sans reposer sur un backdrop-filter lourd empile en continu. */}
-            <section className="sticky top-20 z-30 -mx-4 border-b border-border/30 bg-background/95 px-4 py-4 backdrop-blur-sm md:static md:mx-0 md:border-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+            <section className="sticky top-16 z-30 -mx-4 border-b border-border/30 bg-background/95 px-4 py-4 backdrop-blur-sm md:static md:mx-0 md:border-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
                 <div className="mx-auto max-w-7xl md:px-8">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1 md:flex-wrap md:gap-3 md:pb-0">
@@ -158,6 +158,7 @@ export default function Catalogue() {
                                         categoryId: product.category_id,
                                         categoryName: product.categories?.name ?? "",
                                         sku: "",
+                                        inStock: product.in_stock,
                                     }}
                                 />
                             ))}

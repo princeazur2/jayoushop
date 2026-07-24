@@ -70,7 +70,7 @@ export default function Home() {
                     </h1>
 
                     <p className="mt-6 max-w-xl text-base text-muted-foreground md:text-lg">
-                        JA ✨ Jí Yoū — des pieces selectionnees avec passion, pensees pour celles et ceux qui aiment se demarquer.
+                        {settings?.shop_name || "JA ✨ Jí Yoū"} — des pieces selectionnees avec passion, pensees pour celles et ceux qui aiment se demarquer.
                     </p>
 
                     <div className="mt-9 flex flex-col gap-4 sm:flex-row">
@@ -172,6 +172,7 @@ export default function Home() {
                                         categoryId: product.category_id,
                                         categoryName: product.categories?.name ?? "",
                                         sku: "",
+                                        inStock: product.in_stock,
                                     }}
                                 />
                             ))}

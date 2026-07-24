@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ShieldCheck, ShoppingBag, Truck, ChevronLeft, Sparkles, Check } from "lucide-react";
+import { ShieldCheck, ShoppingBag, Truck, ChevronLeft, Sparkles, Check, PackageX } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -35,7 +35,7 @@ export default function ProductDetail() {
 
             <section className="relative z-10 mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8 lg:py-12">
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-20 items-center">
-                    <ProductImage src={product.image} alt={product.name} />
+                    <ProductImage src={product.image} alt={product.name} outOfStock={product.in_stock === false} />
                     <ProductInfo product={product} />
                 </div>
             </section>
@@ -90,10 +90,16 @@ function BackLink() {
     );
 }
 
-function ProductImage({ src, alt }: { src: string; alt: string }) {
+function ProductImage({ src, alt, outOfStock }: { src: string; alt: string; outOfStock: boolean }) {
     return (
         <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-muted/30 shadow-sm animate-fade-up">
-            <img src={src} alt={alt} loading="eager" decoding="async" className="h-full w-full object-cover" />
+            <img
+                src={src}
+                alt={alt}
+                loading="eager"
+                decoding="async"
+                className={"h-full w-full object-cover " + (outOfStock ? "grayscale-[35%] opacity-80" : "")}
+            />
         </div>
     );
 }
@@ -101,8 +107,10 @@ function ProductImage({ src, alt }: { src: string; alt: string }) {
 function ProductInfo({ product }: { product: ProductDB }) {
     const { addItem, setIsOpen } = useCart();
     const [added, setAdded] = useState(false);
+    const outOfStock = product.in_stock === false;
 
     function handleAddToCart() {
+        if (outOfStock) return;
         addItem({
             id: product.id,
             name: product.name,
@@ -116,15 +124,23 @@ function ProductInfo({ product }: { product: ProductDB }) {
         }, 450);
     }
 
-    const cartLabel = added ? "Ajoute !" : "Ajouter au panier";
+    const cartLabel = added ? "Ajoute !" : outOfStock ? "Indisponible" : "Ajouter au panier";
     const categoryName = product.categories?.name ?? "";
 
     return (
         <div className="flex flex-col justify-center">
-            <span className="glass-light inline-flex w-fit items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                <Sparkles className="h-3 w-3" />
-                {categoryName}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+                <span className="glass-light inline-flex w-fit items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                    <Sparkles className="h-3 w-3" />
+                    {categoryName}
+                </span>
+                {outOfStock && (
+                    <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-destructive/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-destructive">
+                        <PackageX className="h-3 w-3" />
+                        Rupture de stock
+                    </span>
+                )}
+            </div>
 
             <h1 className="font-display mt-4 text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl">
                 {product.name}
@@ -146,7 +162,8 @@ function ProductInfo({ product }: { product: ProductDB }) {
                 <Button
                     variant="outline"
                     size="lg"
-                    className="flex-1 gap-2 rounded-full py-4 text-base glass-light border-primary/30 hover:bg-primary/10"
+                    disabled={outOfStock}
+                    className="flex-1 gap-2 rounded-full py-4 text-base glass-light border-primary/30 hover:bg-primary/10 disabled:opacity-50"
                     onClick={handleAddToCart}
                 >
                     <AddToCartIcon added={added} />
@@ -205,6 +222,7 @@ function RelatedProducts({ products }: { products: ProductDB[] }) {
                                 categoryId: p.category_id,
                                 categoryName: p.categories?.name ?? "",
                                 sku: "",
+                                inStock: p.in_stock,
                             }}
                         />
                     ))}
@@ -217,9 +235,11 @@ function RelatedProducts({ products }: { products: ProductDB[] }) {
 function MobileActionBar({ product }: { product: ProductDB }) {
     const { addItem, setIsOpen } = useCart();
     const [added, setAdded] = useState(false);
+    const outOfStock = product.in_stock === false;
     const whatsappLink = getWhatsAppLink({ name: product.name, price: product.price });
 
     function handleAddToCart() {
+        if (outOfStock) return;
         addItem({
             id: product.id,
             name: product.name,
@@ -242,7 +262,12 @@ function MobileActionBar({ product }: { product: ProductDB }) {
                         {product.price.toLocaleString()} FCFA
                     </p>
                 </div>
-                <button onClick={handleAddToCart} className="touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-background/60 text-primary" aria-label="Ajouter au panier">
+                <button
+                    onClick={handleAddToCart}
+                    disabled={outOfStock}
+                    className="touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-background/60 text-primary disabled:opacity-40"
+                    aria-label="Ajouter au panier"
+                >
                     <AddToCartIcon added={added} />
                 </button>
                 <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="touch-target flex h-11 shrink-0 items-center justify-center rounded-full bg-[#25d366] px-5 text-sm font-bold text-white shadow-md">
