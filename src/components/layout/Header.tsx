@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Menu, Search, ShoppingBag, X, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/stores/useCart";
@@ -48,40 +49,62 @@ export default function Header() {
                             key={link.path}
                             to={link.path}
                             className={({ isActive }) =>
-                                `rounded-full px-4 py-2 text-sm font-semibold transition-all ${isActive
-                                    ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
+                                `relative rounded-full px-4 py-2 text-sm font-semibold transition-colors ${isActive
+                                    ? "text-white"
                                     : "text-foreground/70 hover:text-foreground"
                                 }`
                             }
                         >
-                            {link.label}
+                            {({ isActive }) => (
+                                <>
+                                    {isActive && (
+                                        <motion.span
+                                            layoutId="nav-pill"
+                                            className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-primary to-secondary shadow-md"
+                                            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                                        />
+                                    )}
+                                    {link.label}
+                                </>
+                            )}
                         </NavLink>
                     ))}
                 </nav>
 
                 <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full hover:bg-primary/10"
+                    <motion.button
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.92 }}
+                        className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-primary/10"
                         onClick={() => setSearchOpen(true)}
                     >
                         <Search className="h-5 w-5" />
-                    </Button>
+                    </motion.button>
 
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="relative rounded-full hover:bg-primary/10"
+                    <motion.button
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.92 }}
+                        className="relative flex h-11 w-11 items-center justify-center rounded-full hover:bg-primary/10"
                         onClick={() => setIsOpen(true)}
                     >
                         <ShoppingBag className="h-5 w-5" />
-                        {cartCount > 0 && (
-                            <Badge className="absolute -right-1 -top-1 h-5 w-5 justify-center rounded-full bg-gradient-to-r from-primary to-secondary p-0 text-[11px] text-white shadow-sm">
-                                {cartCount}
-                            </Badge>
-                        )}
-                    </Button>
+                        <AnimatePresence>
+                            {cartCount > 0 && (
+                                <motion.div
+                                    key={cartCount}
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    exit={{ scale: 0 }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                                    className="absolute -right-1 -top-1"
+                                >
+                                    <Badge className="h-5 w-5 justify-center rounded-full bg-gradient-to-r from-primary to-secondary p-0 text-[11px] text-white shadow-sm">
+                                        {cartCount}
+                                    </Badge>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.button>
 
                     <Button
                         variant="ghost"
@@ -94,25 +117,33 @@ export default function Header() {
                 </div>
             </div>
 
-            {mobileOpen && (
-                <nav className="flex flex-col gap-1 border-t border-white/30 glass px-4 py-4 md:hidden">
-                    {navLinks.map((link) => (
-                        <NavLink
-                            key={link.path}
-                            to={link.path}
-                            onClick={() => setMobileOpen(false)}
-                            className={({ isActive }) =>
-                                `rounded-xl px-3 py-3 text-sm font-semibold ${isActive
-                                    ? "bg-gradient-to-r from-primary to-secondary text-white"
-                                    : "text-foreground/80 hover:bg-primary/10"
-                                }`
-                            }
-                        >
-                            {link.label}
-                        </NavLink>
-                    ))}
-                </nav>
-            )}
+            <AnimatePresence>
+                {mobileOpen && (
+                    <motion.nav
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="flex flex-col gap-1 overflow-hidden border-t border-white/30 glass px-4 py-4 md:hidden"
+                    >
+                        {navLinks.map((link) => (
+                            <NavLink
+                                key={link.path}
+                                to={link.path}
+                                onClick={() => setMobileOpen(false)}
+                                className={({ isActive }) =>
+                                    `rounded-xl px-3 py-3 text-sm font-semibold ${isActive
+                                        ? "bg-gradient-to-r from-primary to-secondary text-white"
+                                        : "text-foreground/80 hover:bg-primary/10"
+                                    }`
+                                }
+                            >
+                                {link.label}
+                            </NavLink>
+                        ))}
+                    </motion.nav>
+                )}
+            </AnimatePresence>
 
             <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
         </header>
