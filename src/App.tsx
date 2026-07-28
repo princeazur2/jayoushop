@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import Home from "@/pages/Home";
 import Catalogue from "@/pages/Catalogue";
@@ -11,10 +12,31 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AdminRoute from "@/components/AdminRoute";
 import ToastContainer from "@/components/ui/toast-container";
 import ScrollToTop from "@/components/ScrollToTop";
+import IntroSplash from "@/components/IntroSplash";
+import { useSiteSettings } from "@/hooks/useSupabase";
 
 export default function App() {
+  const location = useLocation();
+  const { settings } = useSiteSettings();
+  const [showIntro, setShowIntro] = useState(false);
+
+  useEffect(() => {
+    const alreadySeen = sessionStorage.getItem("jayou-intro-seen");
+    if (!alreadySeen && !location.pathname.startsWith("/admin")) {
+      setShowIntro(true);
+      sessionStorage.setItem("jayou-intro-seen", "1");
+    }
+    // Ne s'execute qu'une seule fois au premier montage
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    document.title = settings?.site_name?.trim() || "JA ✨ Jí Yoū";
+  }, [settings]);
+
   return (
     <>
+      {showIntro && <IntroSplash onFinish={() => setShowIntro(false)} />}
       <ScrollToTop />
       <Routes>
         <Route

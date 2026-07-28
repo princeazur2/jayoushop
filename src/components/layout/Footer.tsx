@@ -4,6 +4,7 @@ import { useSiteSettings } from "@/hooks/useSupabase";
 
 export default function Footer() {
     const { settings } = useSiteSettings();
+    const siteName = settings?.site_name?.trim() || "JA Jí Yoū";
 
     return (
         <footer className="relative overflow-hidden bg-foreground text-background">
@@ -16,12 +17,12 @@ export default function Footer() {
                         {settings?.logo_url ? (
                             <img
                                 src={settings.logo_url}
-                                alt="Logo"
+                                alt={siteName}
                                 className="h-9 w-auto object-contain"
                             />
                         ) : (
                             <span className="font-display text-xl font-semibold flex items-center gap-1.5">
-                                JA <Sparkles className="h-4 w-4 text-secondary" /> Jí Yoū
+                                {siteName} <Sparkles className="h-4 w-4 text-secondary" />
                             </span>
                         )}
                         <p className="mt-3 max-w-sm text-sm text-background/70">
@@ -52,7 +53,7 @@ export default function Footer() {
                 </div>
 
                 <div className="mt-12 border-t border-background/20 pt-6 text-center text-xs text-background/60">
-                    &copy; {new Date().getFullYear()} JA ✨ Jí Yoū. Tous droits reserves.
+                    &copy; {new Date().getFullYear()} {siteName}. Tous droits reserves.
                 </div>
             </div>
         </footer>

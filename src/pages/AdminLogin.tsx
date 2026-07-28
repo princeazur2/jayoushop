@@ -5,30 +5,33 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/stores/useAdmin";
+import { useSiteSettings } from "@/hooks/useSupabase";
 
 export default function AdminLogin() {
     const navigate = useNavigate();
     const { login } = useAdmin();
+    const { settings } = useSiteSettings();
+    const siteName = settings?.site_name?.trim() || "JA Jí Yoū";
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError("");
         setLoading(true);
 
-        setTimeout(() => {
-            const success = login(email, password);
-            if (success) {
-                navigate("/admin/dashboard");
-            } else {
-                setError("Email ou mot de passe incorrect.");
-            }
-            setLoading(false);
-        }, 600);
+        const result = await login(email, password);
+
+        if (result.success) {
+            navigate("/admin/dashboard");
+        } else {
+            setError(result.error || "Email ou mot de passe incorrect.");
+        }
+
+        setLoading(false);
     }
 
     return (
@@ -39,7 +42,7 @@ export default function AdminLogin() {
             <div className="relative z-10 w-full max-w-md rounded-[2rem] glass p-8 shadow-premium-lg">
                 <div className="mb-8 text-center">
                     <span className="font-display text-2xl font-semibold flex items-center justify-center gap-1.5">
-                        JA <Sparkles className="h-4 w-4 text-secondary" /> Jí Yoū
+                        {siteName} <Sparkles className="h-4 w-4 text-secondary" />
                     </span>
                     <p className="mt-2 text-sm text-muted-foreground">
                         Espace administrateur
@@ -55,6 +58,7 @@ export default function AdminLogin() {
                             placeholder="admin@jayou.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            autoComplete="username"
                             required
                         />
                     </div>
@@ -68,6 +72,7 @@ export default function AdminLogin() {
                                 placeholder="Votre mot de passe"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                autoComplete="current-password"
                                 required
                                 className="pr-10"
                             />
@@ -100,10 +105,6 @@ export default function AdminLogin() {
                         {loading ? "Connexion..." : "Se connecter"}
                     </Button>
                 </form>
-
-                <p className="mt-6 text-center text-xs text-muted-foreground">
-                    Demo : admin@jayou.com / admin123
-                </p>
             </div>
         </div>
     );

@@ -4,9 +4,11 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App.tsx";
 import { useTheme } from "@/stores/useTheme";
+import { useAdmin } from "@/stores/useAdmin";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 useTheme.getState().applyColors();
+useAdmin.getState().init();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -45,6 +45,8 @@ export default function ProductDetail() {
         );
     }
 
+    const inStock = product.in_stock !== false;
+
     const relatedProducts = allProducts
         .filter((p) => p.category_id === product.category_id && p.id !== product.id)
         .slice(0, 4);
@@ -80,12 +82,20 @@ export default function ProductDetail() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.6 }}
-                        className="aspect-[4/5] overflow-hidden rounded-[2rem] glass shadow-sm"
+                        className="relative aspect-[4/5] overflow-hidden rounded-[2rem] glass shadow-sm"
                     >
+                        {!inStock && (
+                            <span className="absolute left-4 top-4 z-10 rounded-full bg-foreground/90 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-md">
+                                Épuisé
+                            </span>
+                        )}
                         <img
                             src={product.image}
                             alt={product.name}
-                            className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                            className={
+                                "h-full w-full object-cover transition-transform duration-700 hover:scale-105 " +
+                                (!inStock ? "opacity-60 grayscale-[0.4]" : "")
+                            }
                         />
                     </motion.div>
 
@@ -127,29 +137,52 @@ export default function ProductDetail() {
                             {product.description}
                         </motion.p>
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, delay: 0.5 }}
-                            className="mt-10 flex flex-col gap-4 sm:flex-row"
-                        >
-                            <WhatsAppButton
-                                product={{
-                                    name: product.name,
-                                    price: product.price,
-                                }}
-                                className="flex-1 rounded-full py-4 text-base"
-                            />
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                className="flex-1 gap-2 rounded-full py-4 text-base glass border-primary/30 hover:bg-primary/10"
-                                onClick={handleAddToCart}
+                        {inStock ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: 0.5 }}
+                                className="mt-10 flex flex-col gap-4 sm:flex-row"
                             >
-                                <ShoppingBag className="h-5 w-5" />
-                                Ajouter au panier
-                            </Button>
-                        </motion.div>
+                                <WhatsAppButton
+                                    product={{
+                                        name: product.name,
+                                        price: product.price,
+                                    }}
+                                    className="flex-1 rounded-full py-4 text-base"
+                                />
+                                <Button
+                                    variant="outline"
+                                    size="lg"
+                                    className="flex-1 gap-2 rounded-full py-4 text-base glass border-primary/30 hover:bg-primary/10"
+                                    onClick={handleAddToCart}
+                                >
+                                    <ShoppingBag className="h-5 w-5" />
+                                    Ajouter au panier
+                                </Button>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: 0.5 }}
+                                className="mt-10 flex flex-col gap-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left"
+                            >
+                                <div>
+                                    <p className="font-display text-lg font-semibold text-foreground">
+                                        Actuellement épuisé
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Contactez-nous pour etre informe(e) de son retour en stock.
+                                    </p>
+                                </div>
+                                <WhatsAppButton
+                                    product={{ name: product.name, price: product.price }}
+                                    label="Etre averti(e)"
+                                    className="rounded-full py-3 px-6 text-sm sm:shrink-0"
+                                />
+                            </motion.div>
+                        )}
 
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -193,7 +226,12 @@ export default function ProductDetail() {
                                         to={"/produit/" + p.id}
                                         className="group block overflow-hidden rounded-3xl glass shadow-sm transition-all hover:-translate-y-2 hover:glow-primary"
                                     >
-                                        <div className="aspect-[4/5] overflow-hidden bg-muted/30">
+                                        <div className="relative aspect-[4/5] overflow-hidden bg-muted/30">
+                                            {p.in_stock === false && (
+                                                <span className="absolute left-3 top-3 z-10 rounded-full bg-foreground/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
+                                                    Épuisé
+                                                </span>
+                                            )}
                                             <img src={p.image} alt={p.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                         </div>
                                         <div className="p-5">

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
     Select,
     SelectContent,
@@ -37,6 +38,7 @@ const emptyForm = {
     price: "",
     category_id: "",
     image: "",
+    in_stock: true,
 };
 
 export default function ProductFormDialog({
@@ -58,6 +60,7 @@ export default function ProductFormDialog({
                 price: String(product.price),
                 category_id: String(product.category_id),
                 image: product.image,
+                in_stock: product.in_stock !== false,
             });
         } else {
             setForm(emptyForm);
@@ -80,6 +83,7 @@ export default function ProductFormDialog({
             price: Number(form.price),
             category_id: Number(form.category_id),
             image: form.image,
+            in_stock: form.in_stock,
         };
 
         try {
@@ -163,6 +167,20 @@ export default function ProductFormDialog({
                                     ))}
                                 </SelectContent>
                             </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4 rounded-xl border border-border/50 px-4 py-3">
+                            <div className="flex flex-col">
+                                <Label htmlFor="in-stock-switch">Disponibilite</Label>
+                                <span className="text-xs text-muted-foreground">
+                                    {form.in_stock ? "Ce produit est en stock" : "Ce produit est marque comme epuise"}
+                                </span>
+                            </div>
+                            <Switch
+                                id="in-stock-switch"
+                                checked={form.in_stock}
+                                onCheckedChange={(checked) => setForm({ ...form, in_stock: checked })}
+                            />
                         </div>
 
                         <ImageUploadField

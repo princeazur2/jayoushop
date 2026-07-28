@@ -19,6 +19,7 @@ export default function Header() {
     const { totalItems, setIsOpen } = useCart();
     const cartCount = totalItems();
     const { settings } = useSiteSettings();
+    const siteName = settings?.site_name?.trim() || "JA Jí Yoū";
 
     return (
         <header className="sticky top-0 z-50 w-full glass shadow-sm">
@@ -27,17 +28,15 @@ export default function Header() {
                     {settings?.logo_url ? (
                         <img
                             src={settings.logo_url}
-                            alt="Logo"
+                            alt={siteName}
                             className="h-12 w-auto object-contain"
                         />
                     ) : (
-                        <div className="flex flex-col leading-none">
+                        <div className="flex items-center gap-1.5">
                             <span className="font-display text-2xl font-semibold tracking-tight text-foreground">
-                                JA <Sparkles className="inline h-4 w-4 text-secondary -mt-2" />
+                                {siteName}
                             </span>
-                            <span className="font-display text-xs italic text-primary">
-                                Jí Yoū
-                            </span>
+                            <Sparkles className="h-4 w-4 text-secondary" />
                         </div>
                     )}
                 </Link>

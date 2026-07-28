@@ -129,40 +129,51 @@ export default function Catalogue() {
                 ) : (
                     <motion.div layout className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                         <AnimatePresence mode="popLayout">
-                            {sortedProducts.map((product) => (
-                                <motion.div
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    transition={{ duration: 0.4 }}
-                                    key={product.id}
-                                >
-                                    <Link
-                                        to={"/produit/" + product.id}
-                                        className="group block overflow-hidden rounded-3xl glass shadow-sm transition-all duration-500 hover:-translate-y-2 hover:glow-primary"
+                            {sortedProducts.map((product) => {
+                                const inStock = product.in_stock !== false;
+                                return (
+                                    <motion.div
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.9 }}
+                                        transition={{ duration: 0.4 }}
+                                        key={product.id}
                                     >
-                                        <div className="aspect-[4/5] overflow-hidden bg-muted/30">
-                                            <img
-                                                src={product.image}
-                                                alt={product.name}
-                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                            />
-                                        </div>
-                                        <div className="p-5 flex flex-col gap-1">
-                                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">
-                                                {product.categories?.name}
-                                            </span>
-                                            <h3 className="font-display text-lg text-foreground group-hover:text-primary transition-colors">
-                                                {product.name}
-                                            </h3>
-                                            <p className="font-display text-xl font-semibold text-gradient mt-1">
-                                                {product.price.toLocaleString()} FCFA
-                                            </p>
-                                        </div>
-                                    </Link>
-                                </motion.div>
-                            ))}
+                                        <Link
+                                            to={"/produit/" + product.id}
+                                            className="group block overflow-hidden rounded-3xl glass shadow-sm transition-all duration-500 hover:-translate-y-2 hover:glow-primary"
+                                        >
+                                            <div className="relative aspect-[4/5] overflow-hidden bg-muted/30">
+                                                {!inStock && (
+                                                    <span className="absolute left-3 top-3 z-10 rounded-full bg-foreground/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
+                                                        Épuisé
+                                                    </span>
+                                                )}
+                                                <img
+                                                    src={product.image}
+                                                    alt={product.name}
+                                                    className={
+                                                        "h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 " +
+                                                        (!inStock ? "opacity-60 grayscale-[0.4]" : "")
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="p-5 flex flex-col gap-1">
+                                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">
+                                                    {product.categories?.name}
+                                                </span>
+                                                <h3 className="font-display text-lg text-foreground group-hover:text-primary transition-colors">
+                                                    {product.name}
+                                                </h3>
+                                                <p className="font-display text-xl font-semibold text-gradient mt-1">
+                                                    {product.price.toLocaleString()} FCFA
+                                                </p>
+                                            </div>
+                                        </Link>
+                                    </motion.div>
+                                );
+                            })}
                         </AnimatePresence>
                     </motion.div>
                 )}
