@@ -423,18 +423,13 @@ export async function deleteBlogPost(id: number) {
 }
 
 /* ------------------------------------------------------------------ */
-<<<<<<< HEAD
 /* Fonctions - Parametres du site (nom, logo, video de fond)          */
-=======
-/* Fonctions - Parametres du site (logo, video de fond, nom)          */
->>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
 /* ------------------------------------------------------------------ */
 
 export type SiteSettingsInput = {
     site_name?: string | null;
     logo_url?: string | null;
     hero_video_url?: string | null;
-    shop_name?: string | null;
 };
 
 export async function updateSiteSettings(input: SiteSettingsInput) {

@@ -21,11 +21,7 @@ export type ProductDB = {
     category_id: number;
     image: string;
     featured: boolean;
-<<<<<<< HEAD
     in_stock?: boolean;
-=======
-    in_stock: boolean;
->>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
     created_at: string;
     categories?: { name: string; slug: string };
 };
@@ -46,5 +42,4 @@ export type SiteSettingsDB = {
     site_name: string | null;
     logo_url: string | null;
     hero_video_url: string | null;
-    shop_name: string | null;
 };

@@ -82,20 +82,6 @@
   ::selection {
     background-color: hsl(var(--primary) / 0.25);
   }
-
-  /* Respecte les preferences systeme "reduire les animations" :
-     tres utile sur les Android bas de gamme ou en mode economie de batterie */
-  @media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
 }
 
 @layer utilities {
@@ -110,9 +96,6 @@
     color: transparent;
   }
 
-  /* Effet verre "lourd" : reserve aux elements uniques a l'ecran
-     (header sticky, tiroir panier, modales) pour ne pas cumuler
-     plusieurs backdrop-filter couteux en meme temps sur Android. */
   .glass {
     background: hsl(0 0% 100% / 0.58);
     backdrop-filter: blur(28px) saturate(180%);
@@ -125,16 +108,6 @@
     backdrop-filter: blur(28px) saturate(180%);
     -webkit-backdrop-filter: blur(28px) saturate(180%);
     border: 1px solid hsl(0 0% 100% / 0.12);
-  }
-
-  /* Version allegee pour les elements qui se repetent (chips, badges,
-     petites cartes) : flou reduit, moins couteux quand il y en a plusieurs
-     a l'ecran en meme temps. */
-  .glass-light {
-    background: hsl(0 0% 100% / 0.65);
-    backdrop-filter: blur(8px) saturate(140%);
-    -webkit-backdrop-filter: blur(8px) saturate(140%);
-    border: 1px solid hsl(0 0% 100% / 0.4);
   }
 
   .glow-primary {
@@ -152,51 +125,6 @@
     opacity: 0.55;
     animation: blob-float 16s cubic-bezier(0.45, 0, 0.55, 1) infinite;
     pointer-events: none;
-    /* Evite de repeindre inutilement le reste de la page sur les GPU faibles */
-    will-change: transform;
-  }
-
-  /* --- Identite SmartMarket --- */
-
-  .tilt-card {
-    transform-style: preserve-3d;
-    transition: transform 0.15s ease-out, box-shadow 0.35s ease;
-  }
-
-  .shimmer-bg {
-    background: linear-gradient(90deg,
-        hsl(var(--muted)) 25%,
-        hsl(var(--muted-foreground) / 0.15) 37%,
-        hsl(var(--muted)) 63%);
-    background-size: 400% 100%;
-    animation: shimmer 2.5s ease-in-out infinite;
-  }
-
-  .magnetic-btn {
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
-  }
-
-  .magnetic-btn:hover {
-    transform: translateY(-2px) scale(1.03);
-  }
-
-  .magnetic-btn:active {
-    transform: translateY(0) scale(0.97);
-  }
-
-  .grain-overlay {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* Zone tactile minimale confortable (44px) pour les boutons denses
-     sur mobile, meme quand le contenu visuel est plus petit. */
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
   }
 }
 
@@ -226,19 +154,6 @@
   }
 }
 
-<<<<<<< HEAD
-=======
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
-}
-
->>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
