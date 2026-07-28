@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+<<<<<<< HEAD
 import {
     LogOut,
     Package,
@@ -14,6 +15,9 @@ import {
     Star,
     PackageX,
 } from "lucide-react";
+=======
+import { LogOut, Package, Tag, FileText, Palette, Plus, Pencil, Trash2, Image as ImageIcon, Loader2, Sparkles, Star, PackageCheck, PackageX } from "lucide-react";
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -85,9 +89,15 @@ export default function AdminDashboard() {
                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-white shadow-md">
                             <Sparkles className="h-5 w-5" />
                         </div>
+<<<<<<< HEAD
                         <div className="min-w-0 flex flex-col leading-tight">
                             <span className="truncate font-display text-lg font-semibold text-foreground">
                                 {siteName}
+=======
+                        <div className="flex flex-col leading-tight">
+                            <span className="font-display text-lg font-semibold text-foreground">
+                                Tableau de bord
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
                             </span>
                             <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                                 Administration
@@ -253,17 +263,29 @@ function StatsRow() {
 
 function SectionCard({
     title,
+    description,
     action,
     children,
 }: {
     title: string;
+    description?: string;
     action?: React.ReactNode;
     children: React.ReactNode;
 }) {
     return (
         <div className="overflow-hidden rounded-3xl glass shadow-sm">
+<<<<<<< HEAD
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/30 px-5 py-5 md:px-8">
                 <h3 className="font-display text-lg font-bold text-foreground sm:text-xl">{title}</h3>
+=======
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/30 px-6 py-5 md:px-8">
+                <div>
+                    <h3 className="font-display text-xl font-bold text-foreground">{title}</h3>
+                    {description && (
+                        <p className="mt-1 max-w-lg text-sm text-muted-foreground">{description}</p>
+                    )}
+                </div>
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
                 {action}
             </div>
             <div className="bg-background/40">{children}</div>
@@ -296,6 +318,8 @@ function ProductsTab() {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [deletingProduct, setDeletingProduct] = useState<ProductDB | null>(null);
     const [deleting, setDeleting] = useState(false);
+    const [stockSavingId, setStockSavingId] = useState<number | null>(null);
+
     const [stockSavingId, setStockSavingId] = useState<number | null>(null);
 
     function openCreate() {
@@ -334,7 +358,11 @@ function ProductsTab() {
             await toggleStock(product);
             refetch();
         } catch {
+<<<<<<< HEAD
             showToast("error", "Impossible de mettre a jour la disponibilite.");
+=======
+            showToast("error", "Impossible de mettre a jour le stock.");
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
         } finally {
             setStockSavingId(null);
         }
@@ -343,6 +371,7 @@ function ProductsTab() {
     return (
         <SectionCard
             title="Gestion des produits"
+            description="Ajoutez, modifiez et gerez la disponibilite (stock) de chaque produit."
             action={
                 <Button
                     size="sm"
@@ -397,6 +426,7 @@ function ProductsTab() {
                                             </Button>
                                         </div>
                                     </div>
+<<<<<<< HEAD
 
                                     <button
                                         onClick={() => handleToggleStock(product)}
@@ -412,6 +442,46 @@ function ProductsTab() {
                                 </li>
                             );
                         })}
+=======
+                                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                                        <span className="inline-flex items-center rounded-full bg-secondary/10 px-2 py-0.5 text-[11px] font-semibold text-secondary">
+                                            {product.categories?.name || "-"}
+                                        </span>
+                                        <span className="text-sm font-bold text-gradient">
+                                            {product.price.toLocaleString()} FCFA
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => handleToggleStock(product)}
+                                        disabled={stockSavingId === product.id}
+                                        className={
+                                            "mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold transition-colors disabled:opacity-50 " +
+                                            (product.in_stock !== false
+                                                ? "bg-success/10 text-success"
+                                                : "bg-destructive/10 text-destructive")
+                                        }
+                                    >
+                                        {stockSavingId === product.id ? (
+                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                        ) : product.in_stock !== false ? (
+                                            <PackageCheck className="h-3 w-3" />
+                                        ) : (
+                                            <PackageX className="h-3 w-3" />
+                                        )}
+                                        {product.in_stock !== false ? "En stock" : "Rupture"}
+                                    </button>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1">
+                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10" onClick={() => openEdit(product)}>
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(product)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </li>
+                        ))}
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
                     </ul>
 
                     {/* Vue desktop : tableau */}
@@ -474,10 +544,56 @@ function ProductsTab() {
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 </div>
+<<<<<<< HEAD
                                             </TableCell>
                                         </TableRow>
                                     );
                                 })}
+=======
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-1 text-xs font-semibold text-secondary">
+                                                {product.categories?.name || "-"}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="font-bold text-gradient">
+                                            {product.price.toLocaleString()} FCFA
+                                        </TableCell>
+                                        <TableCell>
+                                            <button
+                                                onClick={() => handleToggleStock(product)}
+                                                disabled={stockSavingId === product.id}
+                                                className={
+                                                    "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-50 " +
+                                                    (product.in_stock !== false
+                                                        ? "bg-success/10 text-success hover:bg-success/20"
+                                                        : "bg-destructive/10 text-destructive hover:bg-destructive/20")
+                                                }
+                                            >
+                                                {stockSavingId === product.id ? (
+                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                ) : product.in_stock !== false ? (
+                                                    <PackageCheck className="h-3 w-3" />
+                                                ) : (
+                                                    <PackageX className="h-3 w-3" />
+                                                )}
+                                                {product.in_stock !== false ? "En stock" : "Rupture"}
+                                            </button>
+                                        </TableCell>
+                                        <TableCell className="text-right px-6 md:px-8">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10" onClick={() => openEdit(product)}>
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10" onClick={() => askDelete(product)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
                             </TableBody>
                         </Table>
                     </div>
@@ -551,6 +667,7 @@ function CategoriesTab() {
     return (
         <SectionCard
             title="Gestion des categories"
+            description="Organisez votre catalogue par univers de produits."
             action={
                 <Button
                     size="sm"
@@ -692,6 +809,7 @@ function BlogTab() {
     return (
         <SectionCard
             title="Articles de blog"
+            description="Publiez du contenu pour animer votre boutique et rassurer vos clients."
             action={
                 <Button
                     size="sm"
@@ -889,10 +1007,14 @@ function FeaturedTab() {
 
 function StyleTab() {
     const { settings, loading, refetch } = useAdminSiteSettings();
+<<<<<<< HEAD
     const { colors, setColors } = useTheme();
     const { showToast } = useToast();
 
     const [siteName, setSiteName] = useState("");
+=======
+    const [shopName, setShopName] = useState("");
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
     const [logoUrl, setLogoUrl] = useState("");
     const [videoUrl, setVideoUrl] = useState("");
     const [saving, setSaving] = useState(false);
@@ -903,7 +1025,11 @@ function StyleTab() {
 
     useEffect(() => {
         if (settings) {
+<<<<<<< HEAD
             setSiteName(settings.site_name || "");
+=======
+            setShopName(settings.shop_name || "");
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
             setLogoUrl(settings.logo_url || "");
             setVideoUrl(settings.hero_video_url || "");
         }
@@ -913,7 +1039,11 @@ function StyleTab() {
         setSaving(true);
         try {
             await updateSiteSettings({
+<<<<<<< HEAD
                 site_name: siteName || null,
+=======
+                shop_name: shopName || null,
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
                 logo_url: logoUrl || null,
                 hero_video_url: videoUrl || null,
             });
@@ -932,11 +1062,84 @@ function StyleTab() {
         setTimeout(() => setColorsSaved(false), 2000);
     }
 
+<<<<<<< HEAD
     function applyPreset(preset: { primary: string; secondary: string }) {
         setPrimary(preset.primary);
         setSecondary(preset.secondary);
         setColors({ primary: preset.primary, secondary: preset.secondary });
     }
+=======
+    return (
+        <div className="flex flex-col gap-8 max-w-xl">
+            <div className="rounded-3xl glass p-8 shadow-sm">
+                <h3 className="font-display text-2xl font-bold mb-2">Nom de la boutique</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                    Ce nom s'affiche dans l'ecran de bienvenue au chargement du site, et remplace
+                    le texte par defaut dans l'en-tete et le pied de page si aucun logo n'est defini.
+                </p>
+
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="shop-name">Nom affiche</Label>
+                    <Input
+                        id="shop-name"
+                        value={shopName}
+                        onChange={(e) => setShopName(e.target.value)}
+                        placeholder="JA Jí Yoū"
+                        className="h-12 rounded-xl text-base"
+                    />
+                </div>
+            </div>
+
+            <div className="rounded-3xl glass p-8 shadow-sm">
+                <h3 className="font-display text-2xl font-bold mb-2">Logo de la boutique</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                    Ce logo remplacera le texte de la boutique dans l'en-tete, le pied de page et
+                    l'ecran de bienvenue. Sans logo, le nom personnalise s'affiche automatiquement.
+                </p>
+
+                <ImageUploadField
+                    id="logo-upload"
+                    label="Logo"
+                    value={logoUrl}
+                    onChange={setLogoUrl}
+                    folder="branding"
+                />
+            </div>
+
+            <div className="rounded-3xl glass p-8 shadow-sm">
+                <h3 className="font-display text-2xl font-bold mb-2">Video de fond (page d'accueil)</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                    Cette video s'affichera en arriere-plan de la section principale de la page d'accueil,
+                    en boucle et sans son. Sans video, le fond degrade actuel s'affiche.
+                </p>
+
+                <VideoUploadField
+                    id="hero-video-upload"
+                    label="Video de fond"
+                    value={videoUrl}
+                    onChange={setVideoUrl}
+                    folder="hero"
+                />
+            </div>
+
+            <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="gap-2 rounded-full h-12 text-base font-bold self-start px-8 bg-gradient-to-r from-primary to-secondary text-white shadow-md hover:opacity-90"
+            >
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                {saving ? "Enregistrement..." : "Enregistrer les modifications"}
+            </Button>
+        </div>
+    );
+}
+
+function ThemeTab() {
+    const { colors, setColors } = useTheme();
+    const [primary, setPrimary] = useState(colors.primary);
+    const [secondary, setSecondary] = useState(colors.secondary);
+    const [saved, setSaved] = useState(false);
+>>>>>>> 6049a46d8d1609ab6f4044a8a89541f0b4092669
 
     const presets = [
         { label: "Violet + Orange (defaut)", primary: "258 90% 66%", secondary: "24 95% 53%" },
