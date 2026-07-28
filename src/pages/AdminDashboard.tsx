@@ -65,8 +65,8 @@ export default function AdminDashboard() {
     const { settings } = useAdminSiteSettings();
     const [activeTab, setActiveTab] = useState<TabId>("products");
 
-    function handleLogout() {
-        logout();
+    async function handleLogout() {
+        await logout();
         navigate("/admin");
     }
 

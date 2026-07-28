@@ -17,12 +17,12 @@ export const useAdmin = create<AdminState>((set) => ({
     loading: true,
 
     init: () => {
-        // Recupere la session existante (si l'utilisateur est deja connecte)
+        // Récupère la session existante (si l'utilisateur est déjà connecté)
         supabase.auth.getSession().then(({ data: { session } }) => {
             set({ session, isAuthenticated: !!session, loading: false });
         });
 
-        // Reagit aux changements de session (connexion, deconnexion, expiration)
+        // Réagit aux changements de session (connexion, déconnexion, expiration)
         supabase.auth.onAuthStateChange((_event, session) => {
             set({ session, isAuthenticated: !!session, loading: false });
         });
