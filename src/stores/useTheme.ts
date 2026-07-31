@@ -13,8 +13,8 @@ interface ThemeState {
 }
 
 const DEFAULT_COLORS: ThemeColors = {
-    primary: "258 90% 66%",
-    secondary: "24 95% 53%",
+    primary: "267 90% 58%",
+    secondary: "201 90% 60%",
 };
 
 export const useTheme = create<ThemeState>()(

@@ -939,7 +939,7 @@ function StyleTab() {
     }
 
     const presets = [
-        { label: "Violet + Orange (defaut)", primary: "258 90% 66%", secondary: "24 95% 53%" },
+        { label: "Violet + Bleu (defaut)", primary: "267 90% 58%", secondary: "201 90% 60%" },
         { label: "Rose + Violet", primary: "330 81% 60%", secondary: "263 70% 50%" },
         { label: "Bleu + Turquoise", primary: "217 91% 60%", secondary: "172 66% 50%" },
         { label: "Or + Noir profond", primary: "38 92% 50%", secondary: "258 25% 20%" },

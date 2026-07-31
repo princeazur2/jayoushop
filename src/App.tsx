@@ -13,6 +13,7 @@ import AdminRoute from "@/components/AdminRoute";
 import ToastContainer from "@/components/ui/toast-container";
 import ScrollToTop from "@/components/ScrollToTop";
 import IntroSplash from "@/components/IntroSplash";
+import InstallPWAPrompt from "@/components/InstallPWAPrompt";
 import { useSiteSettings } from "@/hooks/useSupabase";
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
     <>
       {showIntro && <IntroSplash onFinish={() => setShowIntro(false)} />}
       <ScrollToTop />
+      <InstallPWAPrompt />
       <Routes>
         <Route
           path="/"

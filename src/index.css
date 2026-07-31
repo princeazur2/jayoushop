@@ -15,12 +15,12 @@
     --popover: 0 0% 100%;
     --popover-foreground: 258 25% 14%;
 
-    /* Violet premium */
-    --primary: 258 90% 66%;
+    /* Violet du logo */
+    --primary: 267 90% 58%;
     --primary-foreground: 0 0% 100%;
 
-    /* Orange vibrant */
-    --secondary: 24 95% 53%;
+    /* Bleu du logo */
+    --secondary: 201 90% 60%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 258 30% 97%;
@@ -36,7 +36,7 @@
 
     --border: 258 20% 91%;
     --input: 258 20% 91%;
-    --ring: 258 90% 66%;
+    --ring: 267 90% 58%;
 
     --radius: 1.15rem;
   }
@@ -48,9 +48,9 @@
     --card-foreground: 258 20% 96%;
     --popover: 258 25% 10%;
     --popover-foreground: 258 20% 96%;
-    --primary: 258 90% 70%;
+    --primary: 267 90% 62%;
     --primary-foreground: 258 30% 7%;
-    --secondary: 24 95% 58%;
+    --secondary: 201 90% 65%;
     --secondary-foreground: 258 30% 7%;
     --muted: 258 20% 16%;
     --muted-foreground: 258 10% 65%;
@@ -60,7 +60,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 258 20% 18%;
     --input: 258 20% 18%;
-    --ring: 258 90% 70%;
+    --ring: 267 90% 62%;
   }
 
   * {
